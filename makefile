@@ -12,8 +12,12 @@ EXECUTABLE=nn
 INC=-I$(SDIR)
 TESTLIB=-I/usr/local/include/UnitTest++ -lUnitTest++
 TESTCMD=testrunner
+OUTPUTTAR=BrettAM_NN.tar
 
-all: test $(EXECUTABLE)
+all: init $(EXECUTABLE)
+
+init:
+	mkdir -p $(ODIR)
 
 $(ODIR)/%.o: $(SDIR)/%.cpp
 	$(CC) -c $(INC) -o $@ $< $(CFLAGS)
@@ -25,5 +29,8 @@ test: $(OBJS) $(TESTS)
 	$(CC) $(TESTS) $(INC) $(TESTLIB) $(OBJS) -o $(TESTCMD)
 	./$(TESTCMD)
 
+tar: test
+	tar -cf $(OUTPUTTAR) ./makefile ./src
+
 clean:
-	rm -f $(OBJS) $(EXECUTABLE) $(TESTCMD)
+	rm -f $(OUTPUTTAR) $(OBJS) $(EXECUTABLE) $(TESTCMD)
