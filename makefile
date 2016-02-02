@@ -5,6 +5,7 @@ TDIR=test
 CFLAGS=-Wall -g -O2 -std=gnu++11
 LDFLAGS=
 MAIN=$(SDIR)/main.cpp
+HPPS=$(wildcard $(SDIR)/*.hpp)
 CPPS=$(filter-out $(MAIN), $(wildcard $(SDIR)/*.cpp))
 OBJS=$(addprefix $(ODIR)/,$(notdir $(CPPS:.cpp=.o)))
 TESTS=$(wildcard $(TDIR)/*.cpp)
@@ -22,7 +23,7 @@ init:
 $(ODIR)/%.o: $(SDIR)/%.cpp
 	$(CC) -c $(INC) -o $@ $< $(CFLAGS)
 
-$(EXECUTABLE): $(MAIN) $(OBJS)
+$(EXECUTABLE): $(MAIN) $(HPPS) $(OBJS)
 	$(CC) $(LDFLAGS) $(CFLAGS) $(MAIN) $(OBJS) -o $@
 
 test: $(OBJS) $(TESTS)
