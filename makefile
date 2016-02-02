@@ -2,7 +2,7 @@ CC=g++
 SDIR=src
 ODIR=build
 TDIR=test
-CFLAGS=-c -Wall -g -O2 -std=gnu++11
+CFLAGS=-Wall -g -O2 -std=gnu++11
 LDFLAGS=
 MAIN=$(SDIR)/main.cpp
 CPPS=$(filter-out $(MAIN), $(wildcard $(SDIR)/*.cpp))
@@ -22,8 +22,8 @@ init:
 $(ODIR)/%.o: $(SDIR)/%.cpp
 	$(CC) -c $(INC) -o $@ $< $(CFLAGS)
 
-$(EXECUTABLE): $(OBJS)
-	$(CC) $(MAIN) $(LDFLAGS) $(OBJS) -o $@
+$(EXECUTABLE): $(MAIN) $(OBJS)
+	$(CC) $(LDFLAGS) $(CFLAGS) $(MAIN) $(OBJS) -o $@
 
 test: $(OBJS) $(TESTS)
 	$(CC) $(TESTS) $(INC) $(TESTLIB) $(OBJS) -o $(TESTCMD)
