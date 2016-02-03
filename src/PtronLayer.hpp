@@ -4,9 +4,9 @@
 
 class PtronLayer {
 private:
-    Matrix weights;
     Decider step;
     double lRate;
+    Matrix weights;
     /**
      * Append a -1 to each row of the input matrix `m`
      */
