@@ -1,7 +1,10 @@
 #include "PtronLayer.hpp"
 
+std::random_device rd;
+std::mt19937 gen(rd());
+std::uniform_real_distribution<> dis(-7, 1);
 double randVal(){
-    return 0.0;
+    return dis(gen);
 }
 
 //public

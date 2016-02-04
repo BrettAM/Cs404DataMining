@@ -1,6 +1,7 @@
 #pragma once
 #include "util.hpp"
 #include "matrix.hpp"
+#include <random>
 
 class PtronLayer {
 private:
