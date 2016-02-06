@@ -1,4 +1,5 @@
 #pragma once
+#include <array>
 #include <assert.h>
 #include <functional>
 #include <ostream>
@@ -12,6 +13,7 @@ public:
     const int rows;
     const int cols;
     Matrix(int rows, int columns);
+    Matrix(std::initializer_list<std::initializer_list<double>> values);
     ~Matrix();
     Matrix(const Matrix& other);
     /** return the value at `row` and `column` indexed at 0

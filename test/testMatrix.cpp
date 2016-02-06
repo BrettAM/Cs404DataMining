@@ -1,6 +1,16 @@
 #include "UnitTest++/UnitTest++.h"
 #include "matrix.hpp"
 
+TEST(ArrayConstructor) {
+    Matrix m = {{1.0, 2.0}, {3.0, 4.0}};
+    CHECK_EQUAL(m.rows, 2);
+    CHECK_EQUAL(m.cols, 2);
+    CHECK_EQUAL(m.get(0,0), 1);
+    CHECK_EQUAL(m.get(0,1), 2);
+    CHECK_EQUAL(m.get(1,0), 3);
+    CHECK_EQUAL(m.get(1,1), 4);
+}
+
 TEST(SetThenGet) {
     Matrix m(1,1);
     m.set(0, 0, 12);
@@ -131,14 +141,8 @@ TEST(OuterProduct) {
 }
 
 TEST(MatrixMultiply) {
-    Matrix a(2, 2);
-    Matrix b(2, 2);
-
-    a.set(0,0, 1); a.set(0,1, 2);
-    a.set(1,0, 3); a.set(1,1, 4);
-
-    b.set(0,0, 5); b.set(0,1, 5);
-    b.set(1,0, 6); b.set(1,1, 6);
+    Matrix a = {{1, 2}, {3, 4}};
+    Matrix b = {{5, 5}, {6, 6}};
 
     Matrix s = a*b;
 

@@ -4,6 +4,20 @@ Matrix::Matrix(int rows, int columns)
     : rows(rows), cols(columns) {
     data = new double[rows*cols];
 }
+Matrix::Matrix(std::initializer_list<std::initializer_list<double>> values)
+        : rows(values.size()), cols(values.begin()->size()){
+    //all columns must have the same number of elements
+    for(auto row : values){
+        assert(row.size() == cols);
+    }
+
+    data = new double[rows*cols];
+    for(int r=0; r<rows; r++){
+        for(int c=0; c<cols; c++){
+            set(r,c, *((values.begin()+r)->begin()+c) );
+        }
+    }
+}
 Matrix::~Matrix(){
     delete[] data;
 }
