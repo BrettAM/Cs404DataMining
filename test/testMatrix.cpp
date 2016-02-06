@@ -31,8 +31,8 @@ TEST(Transpose) {
 TEST(Fill) {
     Matrix m(2, 2);
     m.fill(12.34);
-    for(int r=0; r<m.rows; r++){
-        for(int c=0; c<m.cols; c++){
+    for(size_t r=0; r<m.rows; r++){
+        for(size_t c=0; c<m.cols; c++){
             CHECK_EQUAL(m.get(r,c), 12.34);
         }
     }
@@ -42,8 +42,8 @@ TEST(Map) {
     Matrix m(2, 2);
     m.fill(3);
     m.map([](double v) -> double { return v*v; });
-    for(int r=0; r<m.rows; r++){
-        for(int c=0; c<m.cols; c++){
+    for(size_t r=0; r<m.rows; r++){
+        for(size_t c=0; c<m.cols; c++){
             CHECK_EQUAL(m.get(r,c), 3*3);
         }
     }
@@ -55,8 +55,8 @@ TEST(AddAssign) {
     m.fill(0);
     d.fill(1);
     m += d;
-    for(int r=0; r<m.rows; r++){
-        for(int c=0; c<m.cols; c++){
+    for(size_t r=0; r<m.rows; r++){
+        for(size_t c=0; c<m.cols; c++){
             CHECK_EQUAL(m.get(r,c), 1);
         }
     }
@@ -68,8 +68,8 @@ TEST(Add) {
     m.fill(0);
     d.fill(1);
     Matrix s = m+d;
-    for(int r=0; r<s.rows; r++){
-        for(int c=0; c<s.cols; c++){
+    for(size_t r=0; r<s.rows; r++){
+        for(size_t c=0; c<s.cols; c++){
             CHECK_EQUAL(s.get(r,c), 1);
         }
     }
@@ -81,8 +81,8 @@ TEST(Subtract) {
     m.fill(2);
     d.fill(1);
     Matrix s = m-d;
-    for(int r=0; r<s.rows; r++){
-        for(int c=0; c<s.cols; c++){
+    for(size_t r=0; r<s.rows; r++){
+        for(size_t c=0; c<s.cols; c++){
             CHECK_EQUAL(s.get(r,c), 1);
         }
     }
@@ -92,8 +92,8 @@ TEST(ScalarMultiplyLeft) {
     Matrix m(2, 2);
     m.fill(2);
     Matrix s = 2*m;
-    for(int r=0; r<s.rows; r++){
-        for(int c=0; c<s.cols; c++){
+    for(size_t r=0; r<s.rows; r++){
+        for(size_t c=0; c<s.cols; c++){
             CHECK_EQUAL(s.get(r,c), 4);
         }
     }
@@ -103,8 +103,8 @@ TEST(ScalarMultiplyRight) {
     Matrix m(2, 2);
     m.fill(2);
     Matrix s = m*2;
-    for(int r=0; r<s.rows; r++){
-        for(int c=0; c<s.cols; c++){
+    for(size_t r=0; r<s.rows; r++){
+        for(size_t c=0; c<s.cols; c++){
             CHECK_EQUAL(s.get(r,c), 4);
         }
     }
@@ -118,8 +118,8 @@ TEST(InnerProduct) {
     Matrix s = a*b;
     CHECK_EQUAL(s.rows, 1);
     CHECK_EQUAL(s.cols, 1);
-    for(int r=0; r<s.rows; r++){
-        for(int c=0; c<s.cols; c++){
+    for(size_t r=0; r<s.rows; r++){
+        for(size_t c=0; c<s.cols; c++){
             CHECK_EQUAL(s.get(r,c), 12);
         }
     }
@@ -133,8 +133,8 @@ TEST(OuterProduct) {
     Matrix s = a*b;
     CHECK_EQUAL(s.rows, 2);
     CHECK_EQUAL(s.cols, 2);
-    for(int r=0; r<s.rows; r++){
-        for(int c=0; c<s.cols; c++){
+    for(size_t r=0; r<s.rows; r++){
+        for(size_t c=0; c<s.cols; c++){
             CHECK_EQUAL(s.get(r,c), 6);
         }
     }
@@ -160,8 +160,8 @@ TEST(Concatenate) {
     Matrix s = a|b;
     CHECK_EQUAL(s.rows, 2);
     CHECK_EQUAL(s.cols, 3);
-    for(int r=0; r<s.rows; r++){
-        for(int c=0; c<s.cols; c++){
+    for(size_t r=0; r<s.rows; r++){
+        for(size_t c=0; c<s.cols; c++){
             CHECK_EQUAL(s.get(r,c), 2);
         }
     }

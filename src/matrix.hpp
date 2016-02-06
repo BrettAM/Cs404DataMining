@@ -10,16 +10,16 @@ class Matrix{
 private:
     double* data; //rows by columns
 public:
-    const int rows;
-    const int cols;
-    Matrix(int rows, int columns);
+    const size_t rows;
+    const size_t cols;
+    Matrix(size_t rows, size_t columns);
     Matrix(std::initializer_list<std::initializer_list<double>> values);
     ~Matrix();
     Matrix(const Matrix& other);
     /** return the value at `row` and `column` indexed at 0
       * defined here for inlining
       */
-    double get(int row, int column) const {
+    double get(size_t row, size_t column) const {
         assert(row < rows);
         assert(column < cols);
         return data[row*cols+column];
@@ -27,7 +27,7 @@ public:
     /** set the value at `row` and `column` indexed at 0
       * defined here for inlining
       */
-    void set(int row, int column, double value){
+    void set(size_t row, size_t column, double value){
         assert(row < rows);
         assert(column < cols);
         data[row*cols+column] = value;
