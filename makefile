@@ -27,7 +27,7 @@ $(EXECUTABLE): $(MAIN) $(HPPS) $(OBJS)
 	$(CC) $(LDFLAGS) $(CFLAGS) $(MAIN) $(OBJS) -o $@
 
 test: $(OBJS) $(TESTS)
-	$(CC) $(TESTS) $(INC) $(TESTLIB) $(OBJS) -o $(TESTCMD)
+	$(CC) $(CFLAGS) $(TESTS) $(INC) $(TESTLIB) $(OBJS) -o $(TESTCMD)
 	./$(TESTCMD)
 
 tar: test
