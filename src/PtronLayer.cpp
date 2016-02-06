@@ -27,8 +27,7 @@ Matrix PtronLayer::apply(const Matrix& input){
 
 //private
 Matrix PtronLayer::addBias(const Matrix& m){
-    auto bias = Matrix(m.rows, 1);
-    bias.fill(-1);
+    auto bias = Matrix(m.rows, 1, -1.0);
     return (m|bias);
 }
 
