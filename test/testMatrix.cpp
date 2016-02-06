@@ -1,10 +1,6 @@
 #include "UnitTest++/UnitTest++.h"
 #include "matrix.hpp"
 
-int main(int argc, char const *argv[]) {
-    return UnitTest::RunAllTests();
-}
-
 TEST(SetThenGet) {
     Matrix m(1,1);
     m.set(0, 0, 12);
