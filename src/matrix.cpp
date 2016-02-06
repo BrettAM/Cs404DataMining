@@ -12,8 +12,7 @@ Matrix::Matrix(const Matrix& other)
     data = new double[rows*cols];
     std::copy(other.data, other.data+rows*cols, data);
 }
-//copy constructor
-Matrix Matrix::T(){ //transpose
+Matrix Matrix::T() const{ //transpose
     Matrix nm(cols, rows);
     for(int r = 0; r < rows; r++){
         for(int c = 0; c < cols; c++){
@@ -37,7 +36,7 @@ void Matrix::map(std::function<double(double)> transform){
         }
     }
 }
-std::string Matrix::toString(int precision){
+std::string Matrix::toString(int precision) const{
     std::stringstream ss;
     ss.precision(precision);
     for(int r = 0; r < rows; r++){
@@ -119,4 +118,8 @@ Matrix operator* (double scalar, const Matrix& rhs){
 }
 Matrix operator* (const Matrix& rhs, double scalar){
     return scalar*rhs;
+}
+std::ostream& operator<<(std::ostream& os, const Matrix& m){
+    os << m.toString(6);
+    return os;
 }

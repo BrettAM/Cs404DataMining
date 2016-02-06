@@ -1,8 +1,9 @@
 #pragma once
-#include <functional>
 #include <assert.h>
-#include <string>
+#include <functional>
+#include <ostream>
 #include <sstream>
+#include <string>
 
 class Matrix{
 private:
@@ -30,20 +31,20 @@ public:
         data[row*cols+column] = value;
     }
     /** return a Matrix that is the transpose of this one */
-    Matrix T();
+    Matrix T() const;
     /** fill every element with `value` */
     void fill(double value);
     /** set every element to the result of transform(original_element) */
     void map(std::function<double(double)> transform);
     /** Make a string for displaying the state of this matrix */
-    std::string toString(int precision);
+    std::string toString(int precision) const;
     /** add correspending elements in `rhs` to this matrix */
     Matrix& operator+= (const Matrix& rhs);
     /** construct a matrix that is the elementwise difference of this and rhs */
     Matrix  operator- (const Matrix& rhs) const;
     /** construct a matrix that is the elementwise sum of this and rhs */
     Matrix  operator+ (const Matrix& rhs) const;
-    /** construct a matrix that is the prodect this and rhs */
+    /** construct a matrix that is the product of this and rhs */
     Matrix  operator* (const Matrix& rhs) const;
     /** construct a matrix of this and `rhs` concatenated left to right */
     Matrix  operator| (const Matrix& rhs) const;
@@ -52,4 +53,5 @@ public:
     friend Matrix operator* (const Matrix& rhs, double scalar);
 };
 
-
+/** stream print function to call toString automatically */
+std::ostream& operator<<(std::ostream& os, const Matrix& m);
