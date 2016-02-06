@@ -20,6 +20,7 @@ private:
     Matrix calculate(const Matrix& input);
 public:
     PtronLayer(int numInputs, int numOutputs, double learnRate, Decider step);
+    Matrix getWeights() { return Matrix(weights); }
     /**
      * train the perceptron on the input and corresponding expected data
      * input is a (numCases)x(numInputs) matrix
