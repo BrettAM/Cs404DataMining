@@ -13,7 +13,7 @@ Matrix::Matrix(const Matrix& other)
     std::copy(other.data, other.data+rows*cols, data);
 }
 //copy constructor
-Matrix Matrix::T(){ //transpos
+Matrix Matrix::T(){ //transpose
     Matrix nm(cols, rows);
     for(int r = 0; r < rows; r++){
         for(int c = 0; c < cols; c++){
@@ -59,7 +59,7 @@ Matrix& Matrix::operator+= (const Matrix& rhs){
     }
     return *this;
 }
-Matrix  Matrix::operator- (const Matrix& rhs) const{
+Matrix Matrix::operator- (const Matrix& rhs) const{
     assert (this->rows == rhs.rows);
     assert (this->cols == rhs.cols);
     Matrix nm(rows, cols);
@@ -71,7 +71,7 @@ Matrix  Matrix::operator- (const Matrix& rhs) const{
     }
     return nm;
 }
-Matrix  Matrix::operator+ (const Matrix& rhs) const{
+Matrix Matrix::operator+ (const Matrix& rhs) const{
     assert (this->rows == rhs.rows);
     assert (this->cols == rhs.cols);
     Matrix nm(rows, cols);
@@ -83,7 +83,7 @@ Matrix  Matrix::operator+ (const Matrix& rhs) const{
     }
     return nm;
 }
-Matrix  Matrix::operator* (const Matrix& rhs) const{
+Matrix Matrix::operator* (const Matrix& rhs) const{
     assert (this->cols == rhs.rows);
     Matrix nm(rows, rhs.cols);
     for(int r = 0; r < rows; r++){
@@ -97,7 +97,7 @@ Matrix  Matrix::operator* (const Matrix& rhs) const{
     }
     return nm;
 }
-Matrix  Matrix::operator| (const Matrix& rhs) const{
+Matrix Matrix::operator| (const Matrix& rhs) const{
     assert (this->rows == rhs.rows);
     Matrix nm(rows, cols+rhs.cols);
     for(int r = 0; r < rows; r++){
