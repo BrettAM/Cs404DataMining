@@ -1,6 +1,8 @@
 #pragma once
 #include <functional>
 #include <assert.h>
+#include <string>
+#include <sstream>
 
 class Matrix{
 private:
@@ -33,6 +35,8 @@ public:
     void fill(double value);
     /** set every element to the result of transform(original_element) */
     void map(std::function<double(double)> transform);
+    /** Make a string for displaying the state of this matrix */
+    std::string toString(int precision);
     /** add correspending elements in `rhs` to this matrix */
     Matrix& operator+= (const Matrix& rhs);
     /** construct a matrix that is the elementwise difference of this and rhs */

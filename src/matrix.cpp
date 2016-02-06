@@ -37,6 +37,17 @@ void Matrix::map(std::function<double(double)> transform){
         }
     }
 }
+std::string Matrix::toString(int precision){
+    std::stringstream ss;
+    ss.precision(precision);
+    for(int r = 0; r < rows; r++){
+        for(int c = 0; c < cols; c++){
+            ss << get(r,c) << "  ";
+        }
+        ss << "\n";
+    }
+    return ss.str();
+}
 Matrix& Matrix::operator+= (const Matrix& rhs){
     assert (this->rows == rhs.rows);
     assert (this->cols == rhs.cols);
