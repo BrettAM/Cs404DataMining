@@ -11,6 +11,15 @@ TEST(ArrayConstructor) {
     CHECK_EQUAL(m.get(1,1), 4);
 }
 
+TEST(FillConstructor) {
+    Matrix m(2, 2, 12.34);
+    for(size_t r=0; r<m.rows; r++){
+        for(size_t c=0; c<m.cols; c++){
+            CHECK_EQUAL(m.get(r,c), 12.34);
+        }
+    }
+}
+
 TEST(SetThenGet) {
     Matrix m(1,1);
     m.set(0, 0, 12);
@@ -39,8 +48,7 @@ TEST(Fill) {
 }
 
 TEST(Map) {
-    Matrix m(2, 2);
-    m.fill(3);
+    Matrix m(2, 2, 3.0);
     m.map([](double v) -> double { return v*v; });
     for(size_t r=0; r<m.rows; r++){
         for(size_t c=0; c<m.cols; c++){
@@ -50,10 +58,8 @@ TEST(Map) {
 }
 
 TEST(AddAssign) {
-    Matrix m(2, 2);
-    Matrix d(2, 2);
-    m.fill(0);
-    d.fill(1);
+    Matrix m(2, 2, 0.0);
+    Matrix d(2, 2, 1.0);
     m += d;
     for(size_t r=0; r<m.rows; r++){
         for(size_t c=0; c<m.cols; c++){
@@ -63,10 +69,8 @@ TEST(AddAssign) {
 }
 
 TEST(Add) {
-    Matrix m(2, 2);
-    Matrix d(2, 2);
-    m.fill(0);
-    d.fill(1);
+    Matrix m(2, 2, 0.0);
+    Matrix d(2, 2, 1.0);
     Matrix s = m+d;
     for(size_t r=0; r<s.rows; r++){
         for(size_t c=0; c<s.cols; c++){
@@ -76,10 +80,8 @@ TEST(Add) {
 }
 
 TEST(Subtract) {
-    Matrix m(2, 2);
-    Matrix d(2, 2);
-    m.fill(2);
-    d.fill(1);
+    Matrix m(2, 2, 2.0);
+    Matrix d(2, 2, 1.0);
     Matrix s = m-d;
     for(size_t r=0; r<s.rows; r++){
         for(size_t c=0; c<s.cols; c++){
@@ -89,8 +91,7 @@ TEST(Subtract) {
 }
 
 TEST(ScalarMultiplyLeft) {
-    Matrix m(2, 2);
-    m.fill(2);
+    Matrix m(2, 2, 2.0);
     Matrix s = 2*m;
     for(size_t r=0; r<s.rows; r++){
         for(size_t c=0; c<s.cols; c++){
@@ -100,8 +101,7 @@ TEST(ScalarMultiplyLeft) {
 }
 
 TEST(ScalarMultiplyRight) {
-    Matrix m(2, 2);
-    m.fill(2);
+    Matrix m(2, 2, 2.0);
     Matrix s = m*2;
     for(size_t r=0; r<s.rows; r++){
         for(size_t c=0; c<s.cols; c++){
@@ -111,10 +111,8 @@ TEST(ScalarMultiplyRight) {
 }
 
 TEST(InnerProduct) {
-    Matrix a(1, 2);
-    Matrix b(2, 1);
-    a.fill(2);
-    b.fill(3);
+    Matrix a(1, 2, 2.0);
+    Matrix b(2, 1, 3.0);
     Matrix s = a*b;
     CHECK_EQUAL(s.rows, 1);
     CHECK_EQUAL(s.cols, 1);
@@ -126,10 +124,8 @@ TEST(InnerProduct) {
 }
 
 TEST(OuterProduct) {
-    Matrix a(2, 1);
-    Matrix b(1, 2);
-    a.fill(2);
-    b.fill(3);
+    Matrix a(2, 1, 2.0);
+    Matrix b(1, 2, 3.0);
     Matrix s = a*b;
     CHECK_EQUAL(s.rows, 2);
     CHECK_EQUAL(s.cols, 2);
@@ -153,10 +149,8 @@ TEST(MatrixMultiply) {
 }
 
 TEST(Concatenate) {
-    Matrix a(2, 2);
-    Matrix b(2, 1);
-    a.fill(2);
-    b.fill(2);
+    Matrix a(2, 2, 2.0);
+    Matrix b(2, 1, 2.0);
     Matrix s = a|b;
     CHECK_EQUAL(s.rows, 2);
     CHECK_EQUAL(s.cols, 3);

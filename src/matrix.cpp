@@ -4,6 +4,11 @@ Matrix::Matrix(size_t rows, size_t columns)
     : rows(rows), cols(columns) {
     data = new double[rows*cols];
 }
+Matrix::Matrix(size_t rows, size_t columns, double initialValue)
+    : rows(rows), cols(columns) {
+    data = new double[rows*cols];
+    fill(initialValue);
+}
 Matrix::Matrix(std::initializer_list<std::initializer_list<double>> values)
         : rows(values.size()), cols(values.begin()->size()){
     //all columns must have the same number of elements

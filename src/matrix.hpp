@@ -12,7 +12,13 @@ private:
 public:
     const size_t rows;
     const size_t cols;
+    /** construct a `rows`x`columns` matrix. Initial values are undefined */
     Matrix(size_t rows, size_t columns);
+    /** construct a `rows`x`columns` matrix. Initial values are `initialValue`*/
+    Matrix(size_t rows, size_t columns, double initialValue);
+    /** construct a matrix given a nested initializer list e.g. {{1,2}, {3,4}}
+      * All columns must have the same number of elements.
+      */
     Matrix(std::initializer_list<std::initializer_list<double>> values);
     ~Matrix();
     Matrix(const Matrix& other);
