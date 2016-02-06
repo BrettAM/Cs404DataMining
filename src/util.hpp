@@ -13,11 +13,11 @@ inline double sigmoid(double v){
 }
 
 /** Return a step function that switches from 0.0 to 1.0 at `cutoff` */
-std::function<double(double)> stepFunc(double cutoff){
+inline std::function<double(double)> stepFunc(double cutoff){
     return [cutoff](double v) -> double { return step(v-cutoff); };
 }
 
 /** Return a sigmoid function with slope `slope` at 0.0 */
-std::function<double(double)> sigmoidFunc(double slope){
+inline std::function<double(double)> sigmoidFunc(double slope){
     return [slope](double v) -> double { return sigmoid(v*slope); };
 }
