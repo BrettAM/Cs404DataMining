@@ -88,7 +88,7 @@ Matrix  Matrix::operator* (const Matrix& rhs) const{
 }
 Matrix  Matrix::operator| (const Matrix& rhs) const{
     assert (this->rows == rhs.rows);
-    Matrix nm(rows, cols);
+    Matrix nm(rows, cols+rhs.cols);
     for(int r = 0; r < rows; r++){
         for(int c = 0; c < cols; c++){
             nm.set(r, c, this->get(r,c));
@@ -96,7 +96,7 @@ Matrix  Matrix::operator| (const Matrix& rhs) const{
     }
     for(int r = 0; r < rows; r++){
         for(int c = 0; c < rhs.cols; c++){
-            nm.set(r, c+cols, rhs.get(r,c));
+            nm.set(r, cols+c, rhs.get(r,c));
         }
     }
     return nm;
