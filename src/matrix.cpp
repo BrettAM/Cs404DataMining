@@ -40,6 +40,22 @@ Matrix Matrix::T() const{ //transpose
     }
     return nm;
 }
+std::pair<Matrix, Matrix> Matrix::bisect(size_t splitAt) const {
+    assert(splitAt < cols);
+    Matrix left(rows, splitAt);
+    Matrix right(rows, cols-splitAt);
+    for(size_t r = 0; r < rows; r++){
+        for(size_t c = 0; c < splitAt; c++){
+            left.set(r,c,get(r,c));
+        }
+    }
+    for(size_t r = 0; r < rows; r++){
+        for(size_t c = splitAt; c < cols; c++){
+            right.set(r,c-splitAt,get(r,c));
+        }
+    }
+    return std::pair<Matrix,Matrix>(left,right);
+}
 void Matrix::fill(double value){
     for(size_t r = 0; r < rows; r++){
         for(size_t c = 0; c < cols; c++){

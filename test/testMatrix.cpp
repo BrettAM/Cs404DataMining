@@ -37,6 +37,25 @@ TEST(Transpose) {
     CHECK_EQUAL(m.get(0,1), t.get(1,0));
 }
 
+TEST(Bisect) {
+    Matrix m = {{1.0, 2.0, 3.0},
+                {4.0, 5.0, 6.0} };
+    auto lr = m.bisect(2);
+    Matrix left = lr.first;
+    Matrix right = lr.second;
+    CHECK_EQUAL(m.rows, left.rows);
+    CHECK_EQUAL(m.rows, right.rows);
+    CHECK_EQUAL(left.cols, 2);
+    CHECK_EQUAL(right.cols, 1);
+
+    CHECK_EQUAL( left.get(0,0), 1.0);
+    CHECK_EQUAL( left.get(0,1), 2.0);
+    CHECK_EQUAL( left.get(1,0), 4.0);
+    CHECK_EQUAL( left.get(1,1), 5.0);
+    CHECK_EQUAL(right.get(0,0), 3.0);
+    CHECK_EQUAL(right.get(1,0), 6.0);
+}
+
 TEST(Fill) {
     Matrix m(2, 2);
     m.fill(12.34);

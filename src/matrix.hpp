@@ -6,6 +6,12 @@
 #include <sstream>
 #include <string>
 
+/**
+ * Things that would be nice:
+ * exceptions instead of assertions
+ * value comparison operator
+ */
+
 class Matrix{
 private:
     double* data; //rows by columns
@@ -40,6 +46,11 @@ public:
     }
     /** return a Matrix that is the transpose of this one */
     Matrix T() const;
+    /** return a pair of matricies,
+      * one with the first `column` columns
+      * and another with the rest
+      */
+    std::pair<Matrix, Matrix> bisect(size_t column) const;
     /** fill every element with `value` */
     void fill(double value);
     /** set every element to the result of transform(original_element) */
