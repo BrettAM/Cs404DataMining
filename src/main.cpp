@@ -17,7 +17,8 @@ int main(int argc, char const *argv[]) {
         //if(i % 4 == 0) cout << p.getWeights().T() << "\n";
     }
 
-    cout << p.apply(ps.challenge);
+    cout << "BEGIN TESTING" << endl;
+    cout << (ps.challenge|p.apply(ps.challenge));
 
     return 0;
 }
