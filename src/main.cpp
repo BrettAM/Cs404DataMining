@@ -8,17 +8,22 @@ using namespace std;
 
 int main(int argc, char const *argv[]) {
     ProblemSet ps = readProblem(cin);
-    PtronLayer p(ps.inputCount, ps.outputCount, 0.25, stepFunc(0.5));
+    PtronLayer p(ps.inputCount, ps.outputCount, 0.05, sigmoidFunc(20.0));
 
-    //cout << ps.trainingInput << "\n" << ps.trainingOutput << "\n" << ps.challenge;
+    //cout << (ps.trainingInput | ps.trainingOutput) << "\n" << ps.challenge << endl;
 
-    for(int i=0; i<100; i++){
-        p.update(ps.trainingInput, ps.trainingOutput);
-        //if(i % 4 == 0) cout << p.getWeights().T() << "\n";
+    auto norm = columnNormalizer(ps.trainingInput);
+
+    Matrix trainingInput = norm(ps.trainingInput);
+    Matrix challenge = norm(ps.challenge);
+
+    for(int i=0; i<200000; i++){
+        p.update(trainingInput, ps.trainingOutput);
     }
 
+    cout << "W matrix:\n" << p.getWeights() << endl;
     cout << "BEGIN TESTING" << endl;
-    cout << (ps.challenge|p.apply(ps.challenge));
+    cout << (challenge|p.apply(challenge));
 
     return 0;
 }
