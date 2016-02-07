@@ -73,6 +73,7 @@ void Matrix::map(std::function<double(double)> transform){
 }
 std::string Matrix::toString(int precision) const{
     std::stringstream ss;
+    ss.setf(std::ios::fixed,std::ios::floatfield);
     ss.precision(precision);
     for(size_t r = 0; r < rows; r++){
         for(size_t c = 0; c < cols; c++){
@@ -155,6 +156,6 @@ Matrix operator* (const Matrix& rhs, double scalar){
     return scalar*rhs;
 }
 std::ostream& operator<<(std::ostream& os, const Matrix& m){
-    os << m.toString(6);
+    os << m.toString(2);
     return os;
 }

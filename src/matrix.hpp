@@ -10,6 +10,8 @@
  * Things that would be nice:
  * exceptions instead of assertions
  * value comparison operator
+ * determinant operator
+ * solve for vector function
  */
 
 class Matrix{
