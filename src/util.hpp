@@ -1,6 +1,10 @@
 #pragma once
 #include <cmath>
 #include <functional>
+#include <vector>
+#include <float.h>
+#include <cmath>
+#include "matrix.hpp"
 
 typedef std::function<double(double)> Decider;
 
@@ -21,3 +25,5 @@ inline std::function<double(double)> stepFunc(double cutoff){
 inline std::function<double(double)> sigmoidFunc(double slope){
     return [slope](double v) -> double { return sigmoid(v*slope); };
 }
+
+std::function<Matrix(Matrix)> columnNormalizer(Matrix input);
