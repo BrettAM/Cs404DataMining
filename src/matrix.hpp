@@ -12,6 +12,7 @@
  * value comparison operator
  * determinant operator
  * solve for vector function
+ * print matrix with optimally lined up columns
  */
 
 class Matrix{
