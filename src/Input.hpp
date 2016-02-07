@@ -13,3 +13,5 @@ struct ProblemSet{
 };
 
 ProblemSet readProblem(std::istream& input);
+
+Matrix readMatrix(std::istream& input);

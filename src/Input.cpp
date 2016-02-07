@@ -3,29 +3,26 @@
 using namespace std;
 
 ProblemSet readProblem(istream& input){
-    int inputCount, irows, icols;
+    int inputCount;
     input >> inputCount;
-    input >> irows;
-    input >> icols;
-    Matrix train(irows, icols);
-    for(int r=0; r<irows; r++){
-        for(int c=0; c<icols; c++){
-            double val;
-            input >> val;
-            train.set(r,c, val);
-        }
-    }
-    int crows, ccols;
-    input >> crows;
-    input >> ccols;
-    Matrix challenge(crows, ccols);
-    for(int r=0; r<crows; r++){
-        for(int c=0; c<ccols; c++){
-            double val;
-            input >> val;
-            challenge.set(r,c, val);
-        }
-    }
+    Matrix train = readMatrix(input);
+    Matrix challenge = readMatrix(input);
     auto lr = train.bisect(inputCount);
-    return {inputCount, icols-inputCount, lr.first, lr.second, challenge};
+    int outputCount = train.cols - inputCount;
+    return {inputCount, outputCount, lr.first, lr.second, challenge};
+}
+
+Matrix readMatrix(std::istream& input){
+    int rows, cols;
+    input >> rows;
+    input >> cols;
+    Matrix m(rows, cols);
+    for(int r=0; r<rows; r++){
+        for(int c=0; c<cols; c++){
+            double val;
+            input >> val;
+            m.set(r,c, val);
+        }
+    }
+    return m;
 }
