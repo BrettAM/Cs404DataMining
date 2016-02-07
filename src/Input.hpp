@@ -12,4 +12,4 @@ struct ProblemSet{
     Matrix challenge;
 };
 
-ProblemSet readProblem(std::string file);
+ProblemSet readProblem(std::istream& input);

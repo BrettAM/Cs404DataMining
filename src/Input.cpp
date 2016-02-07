@@ -2,11 +2,7 @@
 
 using namespace std;
 
-ProblemSet readProblem(string file){
-    ifstream input(file, ifstream::in);
-    if(!input.is_open()){
-        throw runtime_error("Can't read problem file");
-    }
+ProblemSet readProblem(istream& input){
     int inputCount, irows, icols;
     input >> inputCount;
     input >> irows;
