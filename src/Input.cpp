@@ -3,13 +3,14 @@
 using namespace std;
 
 ProblemSet readProblem(istream& input){
-    int inputCount;
+    int inputCount, hiddenCount;
     input >> inputCount;
+    input >> hiddenCount;
     Matrix train = readMatrix(input);
     Matrix challenge = readMatrix(input);
     auto lr = train.bisect(inputCount);
     int outputCount = train.cols - inputCount;
-    return {inputCount, outputCount, lr.first, lr.second, challenge};
+    return {inputCount, hiddenCount, outputCount, lr.first, lr.second, challenge};
 }
 
 Matrix readMatrix(std::istream& input){

@@ -6,6 +6,7 @@
 
 struct ProblemSet{
     int inputCount;
+    int hiddenCount;
     int outputCount;
     Matrix trainingInput;
     Matrix trainingOutput;
