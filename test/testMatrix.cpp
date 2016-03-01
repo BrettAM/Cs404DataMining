@@ -76,6 +76,18 @@ TEST(Map) {
     }
 }
 
+TEST(HadamardProduct) {
+    Matrix a = {{1, 2}, {3, 4}};
+    Matrix b = {{-1,1}, {0, 4}};
+    Matrix res = a.hadamard(b);
+    Matrix exp = {{-1, 2}, {0, 16}};
+    for(size_t r=0; r<res.rows; r++){
+        for(size_t c=0; c<res.cols; c++){
+            CHECK_EQUAL(res.get(r,c), exp.get(r,c));
+        }
+    }
+}
+
 TEST(AddAssign) {
     Matrix m(2, 2, 0.0);
     Matrix d(2, 2, 1.0);

@@ -71,6 +71,15 @@ void Matrix::map(std::function<double(double)> transform){
         }
     }
 }
+Matrix Matrix::hadamard(const Matrix& rhs){
+    Matrix res(rows, cols);
+    for(size_t r = 0; r < rows; r++){
+        for(size_t c = 0; c < cols; c++){
+            res.set(r, c, this->get(r,c)*rhs.get(r,c));
+        }
+    }
+    return res;
+}
 std::string Matrix::toString(int precision) const{
     std::stringstream ss;
     ss.setf(std::ios::fixed,std::ios::floatfield);
