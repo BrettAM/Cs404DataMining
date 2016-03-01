@@ -17,12 +17,12 @@ void PtronLayer::update(const Matrix& input, const Matrix& expected){
     auto fullInput = addBias(input);
     auto result = calculate(fullInput); //(numCases)x(numInputs+1)
     auto error  = (expected - result); //(numCases)x(numInputs+1)
-    auto delta  = lRate * (fullInput.T() * error); //(numInputs+1)x(numOutputs)
+    auto delta  = (fullInput.T() * error); //(numInputs+1)x(numOutputs)
     update(delta);
 }
 
 void PtronLayer::update(const Matrix& delta){
-    weights += delta;
+    weights += lRate * delta;
 }
 
 Matrix PtronLayer::apply(const Matrix& input){
@@ -37,7 +37,8 @@ Matrix PtronLayer::addBias(const Matrix& m){
 
 Matrix PtronLayer::calculate(const Matrix& input){
     auto output = (input * weights);
-    output.map(*step);
-    return output;
+    return (*step)(output);
+    //output.map(*step);
+    //return output;
 }
 

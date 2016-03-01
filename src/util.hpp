@@ -11,11 +11,14 @@
 
 class Decider{
 public:
-    double derivative(double val) const;
-    double operator()(double val) const;
+    virtual double calculate(double val)  const = 0;
+    virtual double derivative(double val) const = 0;
+    double operator()(double val) const {
+        return calculate(val);
+    }
     Matrix operator()(Matrix val) const{
         Matrix res(val);
-        res.map( [&](double v) -> double { return (*this)(v); } );
+        res.map( [&](double v) -> double { return calculate(v); } );
         return res;
     }
     Matrix derivative(Matrix val) const{
@@ -29,7 +32,7 @@ class StepFunc : public Decider{
     const double cutoff;
 public:
     StepFunc(double cutoff): cutoff(cutoff) {}
-    double operator()(double val) const {
+    double calculate(double val) const {
         return (val < cutoff)? 0.0 : 1.0;
     }
     double derivative(double val) const {
@@ -41,7 +44,7 @@ class SigmoidFunc : public Decider{
     const double slope;
 public:
     SigmoidFunc(double slope): slope(slope) {}
-    double operator()(double val) const {
+    double calculate(double val) const {
         return 1.0 / (1.0 + exp(-val*slope));
     }
     double derivative(double val) const {

@@ -72,6 +72,8 @@ void Matrix::map(std::function<double(double)> transform){
     }
 }
 Matrix Matrix::hadamard(const Matrix& rhs){
+    assert (this->rows == rhs.rows);
+    assert (this->cols == rhs.cols);
     Matrix res(rows, cols);
     for(size_t r = 0; r < rows; r++){
         for(size_t c = 0; c < cols; c++){
