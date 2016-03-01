@@ -8,7 +8,7 @@ double randVal(){
 }
 
 //public
-PtronLayer::PtronLayer(int numInputs, int numOutputs, double learnRate, Decider step)
+PtronLayer::PtronLayer(int numInputs, int numOutputs, double learnRate, Decider* step)
         : step(step), lRate(learnRate), weights(numInputs+1, numOutputs) {
     weights.map([](double){ return randVal(); });
 }
@@ -18,6 +18,10 @@ void PtronLayer::update(const Matrix& input, const Matrix& expected){
     auto result = calculate(fullInput); //(numCases)x(numInputs+1)
     auto error  = (expected - result); //(numCases)x(numInputs+1)
     auto delta  = lRate * (fullInput.T() * error); //(numInputs+1)x(numOutputs)
+    update(delta);
+}
+
+void PtronLayer::update(const Matrix& delta){
     weights += delta;
 }
 
@@ -33,7 +37,7 @@ Matrix PtronLayer::addBias(const Matrix& m){
 
 Matrix PtronLayer::calculate(const Matrix& input){
     auto output = (input * weights);
-    output.map(step);
+    output.map(*step);
     return output;
 }
 

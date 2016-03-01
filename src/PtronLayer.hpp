@@ -5,7 +5,7 @@
 
 class PtronLayer {
 private:
-    Decider step;
+    Decider* step;
     double lRate;
     Matrix weights;
     /**
@@ -19,7 +19,7 @@ private:
      */
     Matrix calculate(const Matrix& input);
 public:
-    PtronLayer(int numInputs, int numOutputs, double learnRate, Decider step);
+    PtronLayer(int numInputs, int numOutputs, double learnRate, Decider* step);
     Matrix getWeights() { return Matrix(weights); }
     /**
      * train the perceptron on the input and corresponding expected data
@@ -27,6 +27,11 @@ public:
      * expected is a (numCases)x(numOutputs) matrix
      */
     void update(const Matrix& input, const Matrix& expected);
+    /**
+     * update the weights matrix with the input delta matrix
+     * delta in an (numInputs+1)x(numOutputs) Matrix
+     */
+    void update(const Matrix& delta);
     /**
      * apply the perceptron to a set of input row vectors
      * input is a (n)x(numInputs) matrix
