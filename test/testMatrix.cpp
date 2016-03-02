@@ -76,10 +76,10 @@ TEST(Map) {
     }
 }
 
-TEST(HadamardProduct) {
+TEST(ElementWiseMultiply) {
     Matrix a = {{1, 2}, {3, 4}};
     Matrix b = {{-1,1}, {0, 4}};
-    Matrix res = a.hadamard(b);
+    Matrix res = a.elmult(b);
     Matrix exp = {{-1, 2}, {0, 16}};
     for(size_t r=0; r<res.rows; r++){
         for(size_t c=0; c<res.cols; c++){

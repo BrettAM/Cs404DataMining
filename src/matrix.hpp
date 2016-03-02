@@ -58,8 +58,8 @@ public:
     void fill(double value);
     /** set every element to the result of transform(original_element) */
     void map(std::function<double(double)> transform);
-    /** Returns the Hadamard (element-wise) product of this and rhs */
-    Matrix hadamard(const Matrix& rhs);
+    /** Returns the element-wise product of this and rhs */
+    Matrix elmult(const Matrix& rhs);
     /** Make a string for displaying the state of this matrix */
     std::string toString(int precision) const;
     /** add correspending elements in `rhs` to this matrix */

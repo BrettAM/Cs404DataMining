@@ -71,7 +71,7 @@ void Matrix::map(std::function<double(double)> transform){
         }
     }
 }
-Matrix Matrix::hadamard(const Matrix& rhs){
+Matrix Matrix::elmult(const Matrix& rhs){
     assert (this->rows == rhs.rows);
     assert (this->cols == rhs.cols);
     Matrix res(rows, cols);
