@@ -1,23 +1,19 @@
 #pragma once
 #include "util.hpp"
+#include "DecisionFunc.hpp"
 #include "matrix.hpp"
-#include <random>
 
 class PtronLayer {
 private:
-    Decider* step;
-    PtronLayer* next;
+    DecisionFunc* step;
     double lRate;
+    PtronLayer* next;
     Matrix weights;
-    /**
-     * Append a -1 to each row of the input matrix `m`
-     */
-    Matrix addBias(const Matrix& m);
 public:
     const int numInputs;
     const int numOutputs;
-    PtronLayer(int numInputs, int numOutputs, double learnRate, Decider* step);
-    PtronLayer(int numInputs, PtronLayer* next, double learnRate, Decider* step);
+    PtronLayer(int numInputs, int numOutputs, double learnRate, DecisionFunc* step);
+    PtronLayer(int numInputs, PtronLayer* next, double learnRate, DecisionFunc* step);
     Matrix getWeights() { return Matrix(weights); }
     /**
      * train the perceptron on the input and corresponding expected data

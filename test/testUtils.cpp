@@ -1,7 +1,7 @@
 #include "UnitTest++/UnitTest++.h"
 #include "util.hpp"
 
-TEST(Step) {
+/*TEST(Step) {
     CHECK_EQUAL(step(-1.0), 0.0);
     CHECK_EQUAL(step(-0.5), 0.0);
     CHECK_EQUAL(step( 0.0), 1.0);
@@ -19,3 +19,4 @@ TEST(Sigmoid) {
     }
 }
 
+*/

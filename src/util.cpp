@@ -27,3 +27,19 @@ std::function<Matrix(Matrix)> columnNormalizer(Matrix input){
         return res;
     };
 }
+
+std::random_device rd;
+std::mt19937 gen(rd());
+std::uniform_real_distribution<> dis(-0.01, 0.01);
+double randVal(){
+    return dis(gen);
+}
+
+Matrix addBias(const Matrix& m){
+    auto bias = Matrix(m.rows, 1, -1.0);
+    return (m|bias);
+}
+
+Matrix stripBias(const Matrix& m){
+    return m.bisect(m.cols-1).first;
+}

@@ -1,52 +1,54 @@
 #include "PtronLayer.hpp"
 
-std::random_device rd;
-std::mt19937 gen(rd());
-std::uniform_real_distribution<> dis(-0.5, 0.5);
-double randVal(){
-    return dis(gen);
-}
+#include <iostream>
+using namespace std;
 
 //public
-PtronLayer::PtronLayer(int numInputs, int numOutputs, double learnRate, Decider* step)
+PtronLayer::PtronLayer(int numInputs, int numOutputs, double learnRate, DecisionFunc* step)
         : step(step), lRate(learnRate), next(NULL),
           numInputs(numInputs), numOutputs(numOutputs), weights(numInputs+1, numOutputs) {
     weights.map([](double){ return randVal(); });
 }
-PtronLayer::PtronLayer(int numInputs, PtronLayer* next, double learnRate, Decider* step)
+PtronLayer::PtronLayer(int numInputs, PtronLayer* next, double learnRate, DecisionFunc* step)
         : step(step), lRate(learnRate), next(next),
-          numInputs(numInputs), numOutputs(next->numInputs), weights(numInputs+1, numOutputs) {
+          numInputs(numInputs), numOutputs(next->numInputs), weights(numInputs+1, next->numInputs) {
     weights.map([](double){ return randVal(); });
 }
 
+
 Matrix PtronLayer::update(const Matrix& input, const Matrix& expected){
-    auto fullInput = addBias(input); //(numCases)x(numInputs+1)
+    //cerr << input << endl;
+
+    auto fullInput = addBias(input); //(n)x(numInputs+1)
+    //cerr << "fullInput" << endl;
     auto values = step->apply(fullInput * weights);
-    auto result = values.left;
-    auto derivative = values.right;
+    //cerr << "values" << endl;
+    auto result = values.first; //(n)x(numOutputs)
+    //cerr << "result" << endl;
+    auto derivative = values.second; //(n)x(numOutputs)
+    //cerr << "derivative" << endl;
 
-    Matrix errorGrad;
-    if(next != NULL){
-        errorGrad = next->update(result, expected);
-    } else {
-        errorGrad = (expected - finalResult).elmult(derivative);
-    }
+    //(n)x(numOutputs)
+    Matrix error = (next == NULL)? (expected - result)
+                                 : next->update(result, expected);
 
-    auto delta = fullInput.T() * errorGrad;
-    auto inputGrad = delta * weights.T();
+    //cerr << "error" << endl;
+    Matrix errorGrad = error.elmult(derivative); //(n)x(numOutputs)
+    //cerr << "errorGrad" << endl;
 
-    weights += (lRate * delta);
+    auto delta = fullInput.T() * errorGrad; //(numInputs+1)x(numOutputs)
+    //cerr << "delta" << endl;
+    auto inputGrad = stripBias(errorGrad * weights.T()); //(n)x(numInputs)
+    //cerr << "inputGrad" << endl;
+
+    weights += (lRate * delta); //(numInputs+1)x(numOutputs)
+    //cerr << "weights" << endl;
 
     return inputGrad;
 }
 
 Matrix PtronLayer::apply(const Matrix& input){
     auto subresult = (*step)(addBias(input) * weights);
-    return (next == NULL)? subresult : next->apply(subreslt);
+    return (next == NULL)? subresult : next->apply(subresult);
 }
 
-//private
-Matrix PtronLayer::addBias(const Matrix& m){
-    auto bias = Matrix(m.rows, 1, -1.0);
-    return (m|bias);
-}
