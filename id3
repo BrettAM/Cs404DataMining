@@ -1,14 +1,38 @@
 #!/usr/bin/env python3
-
 import sys
 import functools
 import math
 
-identity = lambda x: x
+class sepFunc:
+    def __init__(self, val):
+        self.ltval = val
+    def __repr__(self):
+        return "sepFunc({0.ltval})".format(self)
+    def __str__(self):
+        return "<{0.ltval}".format(self)
+    def __call__(self,x):
+        return x < self.ltval
 
-def classifier(key, by=identity):
-    """ return a function that classifies a given case to a single object """
-    return lambda d: by(d.get(key))
+class identity:
+    def __repr__(self):
+        return "identity()"
+    def __str__(self):
+        return "="
+    def __call__(self, x):
+        return x
+
+class classifier:
+    def __init__(self, key, by=identity()):
+        self.key = key
+        self.by  = by
+    def __repr__(self):
+        return "classifier({0.key}, {0.by})".format(self)
+    def __str__(self):
+        return self.key+self.by+"?"
+    def __call__(self, caseDict):
+        return self.by(caseDict.get(self.key))
+    def __eq__(self, y):
+        return self.key == y.key and self.by == y.by
 
 def occurances(dicts, classifier):
     """ map different classes to occurance counts in a list of dicts """
@@ -38,13 +62,14 @@ def splitDataset(dataset, classifier):
 def entropyGain(dataset, splitClass, entroClass):
     """ the entropy gain WRT entroClass when dataset is split by splitClass """
     splitsets = splitDataset(dataset, splitClass)
-    print("hello?", splitsets.values())
     gain = sum([len(s)*setEntropy(s, entroClass) for s in splitsets.values()])
     return gain
 
 def findAllClasses(dataset):
     """ Return a list of all classifiers applicable to this dataset """
     #eventually the feature keys will need to know if they are continuous or not
+    #for continuous keys, make a classifier(f, sepFunc(ltval)) for each possible
+    #seperation value
     return [classifier(f) for f in dataset[0].keys()]
 
 def id3(dataset, solveFeature):
@@ -52,33 +77,24 @@ def id3(dataset, solveFeature):
     # sort by their entropy
     # recurse on the splitDataset
     # put result in a tree
-    for i in data:
-        print(i)
-    print("--")
-
-    if len(dataset) is 0:
-        return ["Out of features"]
-    if setEntropy(dataset, classifier(solveFeature)) is 0.0:
+    if len(dataset) == 0:
+        return ["No Data"]
+    if setEntropy(dataset, classifier(solveFeature)) == 0.0:
         return ["Answer is "+classifier(solveFeature)(dataset[0])]
 
-    classes = findAllClasses(dataset)
+    # there are a lot of "classifier(solveFeature)" calls in here
+
+    classes = [c for c in findAllClasses(dataset) if not c == classifier(solveFeature)]
     classes.sort(key=lambda c: entropyGain(dataset, c, classifier(solveFeature)))
+    # check if all entropyGain's are 0
     splitsets = splitDataset(dataset, classes[0])
-    return [classes[0]] + [id3(s, solveFeature) for s in splitsets.values()]
+    return [classes[0]] + [[k, id3(v, solveFeature)] for k,v in splitsets.items()]
 
-###
-
+#input
 featureCount = int(input())+1
 features = [input().split(' ')[0] for i in range(0, featureCount)]
 data = [dict(zip(features, l.split())) for l in sys.stdin.readlines()]
 
-for i in data:
-    print(i)
-
-for f in features:
-    print(f+":\t", occurances(data, classifier(f)))
-
-#print(splitDataset(data, classifier(features[0])))
-print("gain: ",entropyGain(data, classifier(features[0]), classifier(features[1])))
-
-print(id3(data, features[-1]))
+result = id3(data, features[-1])
+print(result)
+#pretty print result
