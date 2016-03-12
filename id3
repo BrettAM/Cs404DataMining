@@ -1,0 +1,52 @@
+#!/usr/bin/env python3
+
+import sys
+import functools
+
+identity = lambda x: x
+
+# turn all the "key, by=identity" things into a single "classifier" object?
+
+def occurances(dicts, key, by=identity):
+    """
+    make a map of values found under `key` in `dicts` to an integer of how
+        many times they occur, optionally transforming them with `by` first
+    """
+    values = [by(v) for v in map(lambda d: d.get(key), dicts)]
+    def countOccurance(d,v):
+        d[v] = d.get(v,0) + 1
+        return d
+    return functools.reduce(countOccurance, values, {})
+
+def entropy(occurances):
+    """ Calculate the entropy represented by an iterable of occurance counts """
+
+def entropy(dataset, key, by=identity):
+    """ Calculate the entropy in the data from dividing input by key/by-func """
+
+def findAllSeperations(dataset):
+    """ Return all key/(split function) pairs applicable to this dataset """
+
+def splitDataset(dataset, key, by=identity):
+    """ Return the resulting datasets when input is divided by key/by-func """
+
+def id3(dataset):
+    # findAllSeperations in the dataset
+    # sort by their entropy
+    # recurse on the splitDataset
+    # put result in a tree
+    return []
+
+###
+
+featureCount = int(input())+1
+features = [input().split(' ')[0] for i in range(0, featureCount)]
+data = [dict(zip(features, l.split())) for l in sys.stdin.readlines()]
+
+for i in data:
+    print(i)
+
+for f in features:
+    print(f+":\t", occurances(data, f))
+
+print(id3(data))
