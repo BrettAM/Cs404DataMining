@@ -2,40 +2,69 @@
 
 import sys
 import functools
+import math
 
 identity = lambda x: x
 
-# turn all the "key, by=identity" things into a single "classifier" object?
+def classifier(key, by=identity):
+    """ return a function that classifies a given case to a single object """
+    return lambda d: by(d.get(key))
 
-def occurances(dicts, key, by=identity):
-    """
-    make a map of values found under `key` in `dicts` to an integer of how
-        many times they occur, optionally transforming them with `by` first
-    """
-    values = [by(v) for v in map(lambda d: d.get(key), dicts)]
+def occurances(dicts, classifier):
+    """ map different classes to occurance counts in a list of dicts """
+    values = [classifier(d) for d in dicts]
     def countOccurance(d,v):
         d[v] = d.get(v,0) + 1
         return d
     return functools.reduce(countOccurance, values, {})
 
 def entropy(occurances):
-    """ Calculate the entropy represented by an iterable of occurance counts """
+    """ Calculate the entropy represented by an list of occurance counts """
+    total = sum(occurances)
+    return sum([-p*math.log2(p) for p in map(lambda c: c/total, occurances)])
 
-def entropy(dataset, key, by=identity):
-    """ Calculate the entropy in the data from dividing input by key/by-func """
+def setEntropy(dataset, classifier):
+    """ Calculate the entropy in the data after dividing input by classifier """
+    return entropy(occurances(dataset, classifier).values())
 
-def findAllSeperations(dataset):
-    """ Return all key/(split function) pairs applicable to this dataset """
+def splitDataset(dataset, classifier):
+    """ Return the resulting datasets when input is divided by classifier """
+    def appendCase(d,v):
+        k = classifier(v)
+        (d.setdefault(k,list())).append(v)
+        return d
+    return functools.reduce(appendCase, dataset, {})
 
-def splitDataset(dataset, key, by=identity):
-    """ Return the resulting datasets when input is divided by key/by-func """
+def entropyGain(dataset, splitClass, entroClass):
+    """ the entropy gain WRT entroClass when dataset is split by splitClass """
+    splitsets = splitDataset(dataset, splitClass)
+    print("hello?", splitsets.values())
+    gain = sum([len(s)*setEntropy(s, entroClass) for s in splitsets.values()])
+    return gain
 
-def id3(dataset):
-    # findAllSeperations in the dataset
+def findAllClasses(dataset):
+    """ Return a list of all classifiers applicable to this dataset """
+    #eventually the feature keys will need to know if they are continuous or not
+    return [classifier(f) for f in dataset[0].keys()]
+
+def id3(dataset, solveFeature):
+    # findAllClasses in the dataset
     # sort by their entropy
     # recurse on the splitDataset
     # put result in a tree
-    return []
+    for i in data:
+        print(i)
+    print("--")
+
+    if len(dataset) is 0:
+        return ["Out of features"]
+    if setEntropy(dataset, classifier(solveFeature)) is 0.0:
+        return ["Answer is "+classifier(solveFeature)(dataset[0])]
+
+    classes = findAllClasses(dataset)
+    classes.sort(key=lambda c: entropyGain(dataset, c, classifier(solveFeature)))
+    splitsets = splitDataset(dataset, classes[0])
+    return [classes[0]] + [id3(s, solveFeature) for s in splitsets.values()]
 
 ###
 
@@ -47,6 +76,9 @@ for i in data:
     print(i)
 
 for f in features:
-    print(f+":\t", occurances(data, f))
+    print(f+":\t", occurances(data, classifier(f)))
 
-print(id3(data))
+#print(splitDataset(data, classifier(features[0])))
+print("gain: ",entropyGain(data, classifier(features[0]), classifier(features[1])))
+
+print(id3(data, features[-1]))
