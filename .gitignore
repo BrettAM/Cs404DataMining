@@ -28,3 +28,6 @@
 *.app
 nn
 testrunner
+
+# Test files
+testData/*
