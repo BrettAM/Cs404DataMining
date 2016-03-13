@@ -7,16 +7,10 @@
 #include "Input.hpp"
 using namespace std;
 
-/**
- * input: (n)x(m) matrix
- * output: (n)x(m+1) matrix, the input concatenated with a column of "-1"
- */
 Sigmoid sig(40.0);
 
 int main(int argc, char const *argv[]) {
     ProblemSet ps = readProblem(cin);
-
-    //cout << (ps.trainingInput | ps.trainingOutput) << "\n" << ps.challenge << endl;
 
     auto norm = columnNormalizer(ps.trainingInput);
     Matrix trainingInput = norm(ps.trainingInput);
@@ -26,8 +20,8 @@ int main(int argc, char const *argv[]) {
                 " output: " << ps.outputCount << endl << endl;
 
     PtronLayer output(ps.hiddenCount, ps.outputCount, 0.01, &sig);
-    /*PtronLayer middle(ps.hiddenCount, &output, 0.001, &sig);
-    PtronLayer hidden(ps.inputCount, &middle, 0.001, &sig);*/
+    /*PtronLayer middle(ps.hiddenCount, &output, 0.01, &sig);
+    PtronLayer hidden(ps.inputCount, &middle, 0.01, &sig);*/
     PtronLayer hidden(ps.inputCount, &output, 0.01, &sig);
 
     for(size_t i=0; i<50000; i++){
