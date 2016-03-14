@@ -3,40 +3,64 @@ import sys
 import functools
 import math
 
-class sepFunc:
+#1: hw says not to search the same variable twice, but continous values are
+#       reused here
+#     Solution: filter the variables that remain in datasets as id3 progresses?
+#2: Modification to entropy calculation to favor even trees and prevent
+#       reusing the same Classifier uselessly is not equivalent and might
+#       be wrong on the test dataset
+#     Solution: Classifiers know all possible output classes it can produce
+#       entropy calculations discard Classifiers that result in empty classes
+
+class Feature:
+    def __init__(self, name, continuous=False):
+        self.name = name
+        self.cont = continuous
+    def __str__(self):
+        return self.name
+    def __repr__(self):
+        return self.name
+
+class LessThanEQ:
     def __init__(self, val):
         self.ltval = val
+    def prompt(self, ans):
+        return ("<=" if ans else ">") + self.ltval
     def __repr__(self):
-        return "sepFunc({0.ltval})".format(self)
+        return "LessThanEQ({0.ltval})".format(self)
     def __str__(self):
         return "<{0.ltval}".format(self)
     def __call__(self,x):
-        return x < self.ltval
+        return x <= self.ltval
 
-class identity:
+class Identity:
+    def prompt(self, ans):
+        return "="+ans
     def __repr__(self):
-        return "identity()"
+        return "Identity()"
     def __str__(self):
         return "="
     def __call__(self, x):
         return x
 
-class classifier:
-    def __init__(self, key, by=identity()):
+class Classifier:
+    def __init__(self, key, by=Identity()):
         self.key = key
         self.by  = by
+    def prompt(self, ans):
+        return "{0}{1}:".format(self.key, self.by.prompt(ans))
     def __repr__(self):
-        return "classifier({0.key}, {0.by})".format(self)
+        return "Classifier({0.key}, {0.by})".format(self)
     def __str__(self):
-        return self.key+self.by+"?"
+        return "{0.key}{0.by}".format(self)
     def __call__(self, caseDict):
-        return self.by(caseDict.get(self.key))
+        return self.by(caseDict.get(self.key, None))
     def __eq__(self, y):
         return self.key == y.key and self.by == y.by
 
-def occurances(dicts, classifier):
+def occurances(dicts, Classifier):
     """ map different classes to occurance counts in a list of dicts """
-    values = [classifier(d) for d in dicts]
+    values = [Classifier(d) for d in dicts]
     def countOccurance(d,v):
         d[v] = d.get(v,0) + 1
         return d
@@ -47,14 +71,14 @@ def entropy(occurances):
     total = sum(occurances)
     return sum([-p*math.log2(p) for p in map(lambda c: c/total, occurances)])
 
-def setEntropy(dataset, classifier):
-    """ Calculate the entropy in the data after dividing input by classifier """
-    return entropy(occurances(dataset, classifier).values())
+def setEntropy(dataset, Classifier):
+    """ Calculate the entropy in the data after dividing input by Classifier """
+    return entropy(occurances(dataset, Classifier).values())
 
-def splitDataset(dataset, classifier):
-    """ Return the resulting datasets when input is divided by classifier """
+def splitDataset(dataset, Classifier):
+    """ Return the resulting datasets when input is divided by Classifier """
     def appendCase(d,v):
-        k = classifier(v)
+        k = Classifier(v)
         (d.setdefault(k,list())).append(v)
         return d
     return functools.reduce(appendCase, dataset, {})
@@ -62,39 +86,49 @@ def splitDataset(dataset, classifier):
 def entropyGain(dataset, splitClass, entroClass):
     """ the entropy gain WRT entroClass when dataset is split by splitClass """
     splitsets = splitDataset(dataset, splitClass)
-    gain = sum([len(s)*setEntropy(s, entroClass) for s in splitsets.values()])
+    #gain = sum([len(s)*setEntropy(s, entroClass) for s in splitsets.values()])
+    gain = sum([len(s)*len(s)*setEntropy(s, entroClass) for s in splitsets.values()])
     return gain
 
 def findAllClasses(dataset):
-    """ Return a list of all classifiers applicable to this dataset """
-    #eventually the feature keys will need to know if they are continuous or not
-    #for continuous keys, make a classifier(f, sepFunc(ltval)) for each possible
-    #seperation value
-    return [classifier(f) for f in dataset[0].keys()]
+    """ Return a list of all Classifiers applicable to this dataset """
+    #ugly
+    classes = []
+    for f in dataset[0].keys():
+        if not f.cont:
+            classes.append(Classifier(f))
+        else:
+            values   = [data[f] for data in dataset]
+            classes += [Classifier(f, LessThanEQ(v)) for v in values]
+    return classes
 
 def id3(dataset, solveFeature):
-    # findAllClasses in the dataset
-    # sort by their entropy
-    # recurse on the splitDataset
-    # put result in a tree
-    if len(dataset) == 0:
-        return ["No Data"]
-    if setEntropy(dataset, classifier(solveFeature)) == 0.0:
-        return ["Answer is "+classifier(solveFeature)(dataset[0])]
+    if setEntropy(dataset, solveFeature) == 0.0:
+        return (str(solveFeature(dataset[0])), [])
+    classes = [c for c in findAllClasses(dataset) if not c == solveFeature]
+    classes = [(entropyGain(dataset, c, solveFeature), c) for c in classes]
+    classes.sort(key=lambda c: c[0])
 
-    # there are a lot of "classifier(solveFeature)" calls in here
+    sdata = splitDataset(dataset, classes[0][1])
+    if list(sdata.values())[0] == dataset: #ugly way to detect no progress
+        return ("Out of features", [])
 
-    classes = [c for c in findAllClasses(dataset) if not c == classifier(solveFeature)]
-    classes.sort(key=lambda c: entropyGain(dataset, c, classifier(solveFeature)))
-    # check if all entropyGain's are 0
-    splitsets = splitDataset(dataset, classes[0])
-    return [classes[0]] + [[k, id3(v, solveFeature)] for k,v in splitsets.items()]
+    return (classes[0][1], [(k, id3(v,solveFeature)) for k,v in sdata.items()])
+
+def displayTree(tree, ident):
+    question = tree[0]
+    if len(tree[1]) == 0: #ugly way to print tree leaves
+        print(" "*ident + question)
+    for (ans, nt) in tree[1]:
+        print(" "*ident + question.prompt(ans))
+        displayTree(nt, ident+4)
 
 #input
 featureCount = int(input())+1
-features = [input().split(' ')[0] for i in range(0, featureCount)]
+featureLines = [input().split(' ') for i in range(0, featureCount)]
+features = [Feature(l[0], l[1]=="continuous") for l in featureLines]
+
 data = [dict(zip(features, l.split())) for l in sys.stdin.readlines()]
 
-result = id3(data, features[-1])
-print(result)
-#pretty print result
+result = id3(data, Classifier(features[-1]))
+displayTree(result, 0)
