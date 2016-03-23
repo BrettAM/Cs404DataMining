@@ -24,15 +24,15 @@ class Feature:
 
 class LessThanEQ:
     def __init__(self, val):
-        self.ltval = val
+        self.ltval = float(val)
     def prompt(self, ans):
-        return ("<=" if ans else ">") + self.ltval
+        return ("<=" if ans else ">") + str(self.ltval)
     def __repr__(self):
         return "LessThanEQ({0.ltval})".format(self)
     def __str__(self):
-        return "<{0.ltval}".format(self)
+        return "<={0.ltval}".format(self)
     def __call__(self,x):
-        return x <= self.ltval
+        return float(x) <= self.ltval
 
 class Identity:
     def prompt(self, ans):
@@ -51,7 +51,7 @@ class Classifier:
     def prompt(self, ans):
         return "{0}{1}:".format(self.key, self.by.prompt(ans))
     def __repr__(self):
-        return "Classifier({0.key}, {0.by})".format(self)
+        return "Classifier({0.key}, {1})".format(self, repr(self.by))
     def __str__(self):
         return "{0.key}{0.by}".format(self)
     def __call__(self, caseDict):
