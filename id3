@@ -24,11 +24,12 @@ class Feature:
 
 class LessThanEQ:
     def __init__(self, val):
+        self.val = val
         self.ltval = float(val)
     def prompt(self, ans):
-        return ("<=" if ans else ">") + str(self.ltval)
+        return ("<=" if ans else ">") + str(self.val)
     def __repr__(self):
-        return "LessThanEQ({0.ltval})".format(self)
+        return "LessThanEQ({0.val})".format(self)
     def __str__(self):
         return "<={0.ltval}".format(self)
     def __call__(self,x):
@@ -59,6 +60,11 @@ class Classifier:
         return self.by(caseDict.get(self.key, None))
     def __eq__(self, y):
         return self.key == y.key and self.by == y.by
+    def filter(self, dataset):
+        """ Filter this key out of a dataset """
+        newds = dataset.copy()
+        del newds[self.key]
+        return newds
 
 def occurances(dicts, Classifier):
     """ map different classes to occurance counts in a list of dicts """
@@ -81,7 +87,7 @@ def splitDataset(dataset, Classifier):
     """ Return the resulting datasets when input is divided by Classifier """
     def appendCase(d,v):
         k = Classifier(v)
-        (d.setdefault(k,list())).append(v)
+        (d.setdefault(k,list())).append(Classifier.filter(v))
         return d
     return functools.reduce(appendCase, dataset, {})
 
@@ -114,9 +120,10 @@ def id3(dataset, solveFeature):
     for (e,c) in classes:
         print(e,c)
 
-    sdata = splitDataset(dataset, classes[0][1])
-    if list(sdata.values())[0] == dataset: #ugly way to detect no progress
+    if len(classes) == 0:
         return ("Out of features", [])
+
+    sdata = splitDataset(dataset, classes[0][1])
 
     for f,d in sdata.items():
         print(f,d)
