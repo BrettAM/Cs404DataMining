@@ -65,11 +65,19 @@ class Classifier:
         newds = dataset.copy()
         del newds[self.key]
         return newds
+    def values(self):
+        """ List the possible values """
+        if self.by is ident:
+            return self.key.values
+        else:
+            return [True, False]
 
 def entropy(occurances):
     """ Calculate the entropy represented by an list of occurance counts """
     total = sum(occurances)
-    return sum([-p*math.log2(p) for p in map(lambda c: c/total, occurances)])
+    if total == 0:
+        return math.inf
+    return sum([-p*math.log2(p) for p in map(lambda c: c/total, occurances) if p!=0.0])
 
 def setEntropy(dataset, Classifier):
     """ Calculate the entropy in the data after dividing input by Classifier """
@@ -77,11 +85,17 @@ def setEntropy(dataset, Classifier):
 
 def splitDataset(dataset, Classifier):
     """ Return the resulting datasets when input is divided by Classifier """
+    # def appendCase(d,v):
+    #     k = Classifier(v)
+    #     (d.setdefault(k,list())).append(Classifier.filter(v))
+    #     return d
+    # return functools.reduce(appendCase, dataset, {})
     def appendCase(d,v):
         k = Classifier(v)
-        (d.setdefault(k,list())).append(Classifier.filter(v))
+        d[k].append(Classifier.filter(v))
         return d
-    return functools.reduce(appendCase, dataset, {})
+    emptyMap = {k:[] for k in Classifier.values()}
+    return functools.reduce(appendCase, dataset, emptyMap)
 
 def entropyGain(dataset, splitClass, entroClass):
     """ the entropy gain WRT entroClass when dataset is split by splitClass """
@@ -106,6 +120,7 @@ def id3(dataset, solveFeature):
         return (str(solveFeature(dataset[0])), [])
     classes = [c for c in findAllClasses(dataset) if not c == solveFeature]
     classes = [(entropyGain(dataset, c, solveFeature), c) for c in classes]
+    classes = [c for c in classes if not math.isnan(c[0])]
     classes.sort(key=lambda c: c[0])
 
     print(dataset)
@@ -113,6 +128,7 @@ def id3(dataset, solveFeature):
         print(e,c)
 
     if len(classes) == 0:
+        #return (defaultAnswer, [])
         return ("Out of features", [])
 
     sdata = splitDataset(dataset, classes[0][1])
@@ -135,6 +151,8 @@ def displayTree(tree, ident):
 featureCount = int(input())+1
 featureLines = [input().split() for i in range(0, featureCount)]
 features = [Feature(l) for l in featureLines]
+
+defaultAnswer = next(x for x in features if x.name == "Ans").values[0]
 
 data = [dict(zip(features, l.split())) for l in sys.stdin.readlines()]
 
