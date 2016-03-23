@@ -109,9 +109,17 @@ def id3(dataset, solveFeature):
     classes = [(entropyGain(dataset, c, solveFeature), c) for c in classes]
     classes.sort(key=lambda c: c[0])
 
+    print(dataset)
+    for (e,c) in classes:
+        print(e,c)
+
     sdata = splitDataset(dataset, classes[0][1])
     if list(sdata.values())[0] == dataset: #ugly way to detect no progress
         return ("Out of features", [])
+
+    for f,d in sdata.items():
+        print(f,d)
+    print()
 
     return (classes[0][1], [(k, id3(v,solveFeature)) for k,v in sdata.items()])
 
