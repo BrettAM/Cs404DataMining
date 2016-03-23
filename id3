@@ -43,9 +43,10 @@ class Identity:
         return "="
     def __call__(self, x):
         return x
+ident = Identity()
 
 class Classifier:
-    def __init__(self, key, by=Identity()):
+    def __init__(self, key, by=ident):
         self.key = key
         self.by  = by
     def prompt(self, ans):
