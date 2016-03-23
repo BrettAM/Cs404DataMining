@@ -66,14 +66,6 @@ class Classifier:
         del newds[self.key]
         return newds
 
-def occurances(dicts, Classifier):
-    """ map different classes to occurance counts in a list of dicts """
-    values = [Classifier(d) for d in dicts]
-    def countOccurance(d,v):
-        d[v] = d.get(v,0) + 1
-        return d
-    return functools.reduce(countOccurance, values, {})
-
 def entropy(occurances):
     """ Calculate the entropy represented by an list of occurance counts """
     total = sum(occurances)
@@ -81,7 +73,7 @@ def entropy(occurances):
 
 def setEntropy(dataset, Classifier):
     """ Calculate the entropy in the data after dividing input by Classifier """
-    return entropy(occurances(dataset, Classifier).values())
+    return entropy([len(v) for v in splitDataset(dataset, Classifier).values()])
 
 def splitDataset(dataset, Classifier):
     """ Return the resulting datasets when input is divided by Classifier """
