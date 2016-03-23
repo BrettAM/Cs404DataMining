@@ -6,7 +6,9 @@ import math
 #1: hw says not to search the same variable twice, but continous values are
 #       reused here
 #     Solution: filter the variables that remain in datasets as id3 progresses?
-#2: Empty splits could be asked
+#2: Modification to entropy calculation to favor even trees and prevent
+#       reusing the same Classifier uselessly is not equivalent and might
+#       be wrong on the test dataset
 #     Solution: Classifiers know all possible output classes it can produce
 #       entropy calculations discard Classifiers that result in empty classes
 
@@ -14,9 +16,9 @@ class Feature:
     def __init__(self, args):
         self.name = args[0]
         self.cont = args[1] == "continuous"
-        self.validValues = args[1:] if self.cont else []
+        self.validValues = args[1:] if not self.cont else []
     def __repr__(self):
-        return "Feature({0.name},{0.cont})".format(self)
+        return self.name
     def __str__(self):
         return self.name
 
@@ -41,10 +43,9 @@ class Identity:
         return "="
     def __call__(self, x):
         return x
-ident = Identity()
 
 class Classifier:
-    def __init__(self, key, by=ident):
+    def __init__(self, key, by=Identity()):
         self.key = key
         self.by  = by
     def prompt(self, ans):
@@ -57,23 +58,12 @@ class Classifier:
         return self.by(caseDict.get(self.key, None))
     def __eq__(self, y):
         return self.key == y.key and self.by == y.by
-    def filter(self, data):
-        """ Filter this distinction out of the dataset """
-        result = data.copy()
-        del result[self.key]
-        return result
-    def possibleClasses(self):
-        """ List of possible classes the classifier can produce """
-        if self.by is ident
-            return self.key.validValues
-        else
-            return [True, False]
 
 def occurances(dicts, Classifier):
     """ map different classes to occurance counts in a list of dicts """
     values = [Classifier(d) for d in dicts]
     def countOccurance(d,v):
-        d[v] = d.get(v) + 1
+        d[v] = d.get(v,0) + 1
         return d
     return functools.reduce(countOccurance, values, {})
 
@@ -90,14 +80,15 @@ def splitDataset(dataset, Classifier):
     """ Return the resulting datasets when input is divided by Classifier """
     def appendCase(d,v):
         k = Classifier(v)
-        (d.setdefault(k,list())).append(Classifier.filter(v))
+        (d.setdefault(k,list())).append(v)
         return d
     return functools.reduce(appendCase, dataset, {})
 
 def entropyGain(dataset, splitClass, entroClass):
     """ the entropy gain WRT entroClass when dataset is split by splitClass """
     splitsets = splitDataset(dataset, splitClass)
-    gain = sum([len(s)*setEntropy(s, entroClass) for s in splitsets.values()])
+    #gain = sum([len(s)*setEntropy(s, entroClass) for s in splitsets.values()])
+    gain = sum([len(s)*len(s)*setEntropy(s, entroClass) for s in splitsets.values()])
     return gain
 
 def findAllClasses(dataset):
@@ -136,7 +127,7 @@ def displayTree(tree, ident):
 #input
 featureCount = int(input())+1
 featureLines = [input().split() for i in range(0, featureCount)]
-features = [Feature(l[0], l[1]=="continuous") for l in featureLines]
+features = [Feature(l) for l in featureLines]
 
 data = [dict(zip(features, l.split())) for l in sys.stdin.readlines()]
 
