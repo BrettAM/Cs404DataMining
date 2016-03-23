@@ -87,8 +87,7 @@ def splitDataset(dataset, Classifier):
 def entropyGain(dataset, splitClass, entroClass):
     """ the entropy gain WRT entroClass when dataset is split by splitClass """
     splitsets = splitDataset(dataset, splitClass)
-    #gain = sum([len(s)*setEntropy(s, entroClass) for s in splitsets.values()])
-    gain = sum([len(s)*len(s)*setEntropy(s, entroClass) for s in splitsets.values()])
+    gain = sum([len(s)*setEntropy(s, entroClass) for s in splitsets.values()])
     return gain
 
 def findAllClasses(dataset):
