@@ -3,15 +3,6 @@ import sys
 import functools
 import math
 
-#1: hw says not to search the same variable twice, but continous values are
-#       reused here
-#     Solution: filter the variables that remain in datasets as id3 progresses?
-#2: Modification to entropy calculation to favor even trees and prevent
-#       reusing the same Classifier uselessly is not equivalent and might
-#       be wrong on the test dataset
-#     Solution: Classifiers know all possible output classes it can produce
-#       entropy calculations discard Classifiers that result in empty classes
-
 class Feature:
     def __init__(self, args):
         self.name = args[0]
@@ -76,8 +67,9 @@ def entropy(occurances):
     """ Calculate the entropy represented by an list of occurance counts """
     total = sum(occurances)
     if total == 0:
-        return math.inf
-    return sum([-p*math.log2(p) for p in map(lambda c: c/total, occurances) if p!=0.0])
+        return 0.0 # change to math.inf to disallow empty partitions
+    probability = map(lambda c: c/total, occurances)
+    return sum([-p*math.log2(p) for p in probability if p!=0.0])
 
 def setEntropy(dataset, Classifier):
     """ Calculate the entropy in the data after dividing input by Classifier """
@@ -85,11 +77,6 @@ def setEntropy(dataset, Classifier):
 
 def splitDataset(dataset, Classifier):
     """ Return the resulting datasets when input is divided by Classifier """
-    # def appendCase(d,v):
-    #     k = Classifier(v)
-    #     (d.setdefault(k,list())).append(Classifier.filter(v))
-    #     return d
-    # return functools.reduce(appendCase, dataset, {})
     def appendCase(d,v):
         k = Classifier(v)
         d[k].append(Classifier.filter(v))
@@ -105,9 +92,8 @@ def entropyGain(dataset, splitClass, entroClass):
 
 def findAllClasses(dataset):
     """ Return a list of all Classifiers applicable to this dataset """
-    #ugly
     classes = []
-    for f in dataset[0].keys():
+    for f in dataset[0].keys(): #really wish I had flatMap
         if not f.cont:
             classes.append(Classifier(f))
         else:
@@ -117,15 +103,18 @@ def findAllClasses(dataset):
 
 def id3(dataset, solveFeature):
     if setEntropy(dataset, solveFeature) == 0.0:
-        return (str(solveFeature(dataset[0])), [])
+        if len(dataset) == 0:
+            return [defaultAnswer, []]
+        else:
+            return (str(solveFeature(dataset[0])), [])
     classes = [c for c in findAllClasses(dataset) if not c == solveFeature]
     classes = [(entropyGain(dataset, c, solveFeature), c) for c in classes]
     classes = [c for c in classes if not math.isnan(c[0])]
     classes.sort(key=lambda c: c[0])
 
-    print(dataset)
-    for (e,c) in classes:
-        print(e,c)
+    #print(dataset)
+    #for (e,c) in classes:
+    #    print(e,c)
 
     if len(classes) == 0:
         #return (defaultAnswer, [])
@@ -133,28 +122,38 @@ def id3(dataset, solveFeature):
 
     sdata = splitDataset(dataset, classes[0][1])
 
-    for f,d in sdata.items():
-        print(f,d)
-    print()
+    #for f,d in sdata.items():
+    #    print(f,d)
+    #print()
 
     return (classes[0][1], [(k, id3(v,solveFeature)) for k,v in sdata.items()])
 
 def displayTree(tree, ident):
     question = tree[0]
-    if len(tree[1]) == 0: #ugly way to print tree leaves
+    if len(tree[1]) == 0: #leaf
         print(" "*ident + question)
     for (ans, nt) in tree[1]:
         print(" "*ident + question.prompt(ans))
         displayTree(nt, ident+4)
 
 #input
+def fixHumiTypo(line):
+    result = []
+    for word in line:
+        if word == 'Humi':
+            result.append('Humid')
+        else:
+            result.append(word)
+    return result
+
 featureCount = int(input())+1
 featureLines = [input().split() for i in range(0, featureCount)]
 features = [Feature(l) for l in featureLines]
 
 defaultAnswer = next(x for x in features if x.name == "Ans").values[0]
 
-data = [dict(zip(features, l.split())) for l in sys.stdin.readlines()]
+data = [dict(zip(features, fixHumiTypo(l.split())))
+                for l in sys.stdin.readlines()]
 
 result = id3(data, Classifier(features[-1]))
 displayTree(result, 0)
