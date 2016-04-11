@@ -11,6 +11,7 @@ TEST(Tridiag){
                 {-2, 0, 3,-2},
                 { 2, 1,-2,-1}};
     hhTridiag ht = Tridiagonalize(a);
+
     Matrix recon = ht.transformation * a * ht.transformation.T();
     for(size_t r=0; r<a.rows; r++){
         for(size_t c=0; c<a.cols; c++){
@@ -42,7 +43,7 @@ TEST(Eigen){
         cout << e.values[i] << " ";
     }
     cout << endl;
-    cout << e.vectors << endl;*/
+    cout << e.vectors << endl; */
 }
 
 TEST(Component){
@@ -52,8 +53,6 @@ TEST(Component){
                 { 0, 3, 1, 0} };
 
     Matrix comps = components(a, 2);
-
-    /*cout << comps << endl;*/
 
     Matrix exp = {{0.25,  0.17 },
                   {0.45,  0.62 },
@@ -66,3 +65,5 @@ TEST(Component){
         }
     }
 }
+
+

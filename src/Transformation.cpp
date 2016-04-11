@@ -26,8 +26,10 @@ Matrix components(const Matrix& m, size_t n){
     auto tri = Tridiagonalize(cor);
     auto eig = eigen(tri);
 
-    if(n > eig.vectors.cols) n = eig.vectors.cols;
-    Matrix res(eig.vectors.rows, n);
+    auto vectors = eig.vectors;
+
+    if(n > vectors.cols) n = vectors.cols;
+    Matrix res(vectors.rows, n);
     for(size_t i=0; i<n; i++){
         //select the largest eigen value column
         double maxVal = eig.values[0];
@@ -42,7 +44,7 @@ Matrix components(const Matrix& m, size_t n){
         eig.values[maxValIdx] = 0.0;
         //copy it into result
         for(size_t r=0; r<res.rows; r++){
-            res.set(r, i, eig.vectors.get(r, maxValIdx));
+            res.set(r, i, vectors.get(r, maxValIdx));
         }
     }
 
@@ -51,9 +53,7 @@ Matrix components(const Matrix& m, size_t n){
     return res;
 }
 
-// taken from
-// https://en.wikipedia.org/wiki/Householder_transformation#Tridiagonalization
-hhTridiag Tridiagonalize(const Matrix& s){
+/*hhTridiag Tridiagonalize(const Matrix& s){
     Matrix tri(s);
     Matrix trans = Matrix::Ident(s.cols);
     for(size_t c=0; c<s.cols-1; c++){
@@ -79,7 +79,143 @@ hhTridiag Tridiagonalize(const Matrix& s){
         trans = hh * trans;
     }
     return {tri, trans};
+}*/
+
+hhTridiag Tridiagonalize(const Matrix& s){
+    const int n = s.rows;
+    double a[n][n];
+    for(int i=0; i<n; i++){
+        for(int j=0; j<n; j++){
+            a[i][j] = s.get(i,j);
+        }
+    }
+    double d[n];
+    double e[n];
+    for(int i=0; i<n; i++){
+        d[i] = 0.0;
+        e[i] = 0.0;
+    }
+    //double **a, int n, double d[], double e[]){
+    int l, k, j, i;
+    double scale, hh, h, g, f;
+
+    for (i=n-1; i>=1; i--) {
+        l=i-1;
+        h=scale=0.0;
+        if (l > 0) {
+            for (k=0; k<=l; k++) {
+                scale += fabs(a[i][k]);
+            }
+
+            if (scale == 0.0) {             // Skip transformation.
+                e[i]=a[i][l];
+            }
+            else {
+                for (k=0; k<=l; k++) {
+                    a[i][k] /= scale;       // Use scaled a's for transformation.
+                    h += a[i][k]*a[i][k];   // Form sigma in h.
+                }
+                f=a[i][l];
+                g=(f >= 0.0 ? -sqrt(h) : sqrt(h));
+                e[i]=scale*g;
+                h -= f*g;                   // Now h is equation (11.2.4).
+                a[i][l]=f-g;                // Store u in the ith row of a.
+                f=0.0;
+                for (j=0; j<=l; j++) {
+                    // Next statement can be omitted if eigenvectors not wanted
+                    a[j][i]=a[i][j]/h;      // Store u/H in ith column of a.
+
+                    g=0.0;                  // Form an element of A.u in g.
+                    for (k=0; k<=j; k++) {
+                        g += a[j][k]*a[i][k];
+                    }
+                    for (k=j+1; k<=l; k++) {
+                        g += a[k][j]*a[i][k];
+                    }
+
+                    e[j]=g/h;               // Form element of p in temporarily unused element of e.
+                    f += e[j]*a[i][j];
+                }
+                hh=f/(h+h);                 // Form K, equation (11.2.11).
+
+                // Form q and store in e overwriting p.
+                for (j=0; j<=l; j++) {
+                    f=a[i][j];
+                    e[j]=g=e[j]-hh*f;
+
+                    // Reduce a, equation (11.2.13).
+                    for (k=0; k<=j; k++) {
+                        a[j][k] -= (f*e[k] + g*a[i][k]);
+                    }
+                }
+            }
+        }
+        else {
+            e[i]=a[i][l];
+        }
+        d[i]=h;
+    }
+
+    // Next statement can be omitted if eigenvectors not wanted
+    d[0]=0.0;
+    e[0]=0.0;
+
+    // Contents of this loop can be omitted if eigenvectors not
+    //   wanted except for statement d[i]=a[i][i];
+
+    // Begin accumulation of transformation matrices.
+    for (i=0; i<n; i++) {
+        l=i-1;
+        if (d[i]) {                        // This block skipped when i=0.
+            for (j=0; j<=l; j++) {
+                // Use u and u/H stored in a to form P.Q.
+                g=0.0;
+                for (k=0; k<=l; k++) {
+                    g += a[i][k]*a[k][j];
+                }
+                for (k=0; k<=l; k++) {
+                    a[k][j] -= g*a[k][i];
+                }
+            }
+        }
+        d[i]=a[i][i];                       // This statement remains.
+        a[i][i]=1.0;                        // Reset row and column of a to identity matrix for next iteration.
+        for (j=0; j<=l; j++) {
+            a[j][i]=a[i][j]=0.0;
+        }
+    }
+
+    Matrix transform(s);
+    for(int i=0; i<n; i++){
+        for(int j=0; j<n; j++){
+            transform.set(i,j,a[j][i]);
+        }
+    }
+    Matrix tri(n,n,0);
+    for(int i=0; i<n; i++){
+        tri.set(i,i,d[i]);
+    }
+    for(int i=0; i<n-1; i++){
+        tri.set(i, i+1, e[i+1]);
+        tri.set(i+1, i, e[i+1]);
+    }
+    return {tri, transform};
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 EigenSystem eigen(const hhTridiag& tri) {
     const int n = tri.tridiag.cols;

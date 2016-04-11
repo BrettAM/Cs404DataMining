@@ -126,7 +126,7 @@ Matrix Matrix::frobeniusNormalized() const{
 }
 std::string Matrix::toString(int precision) const{
     std::stringstream ss;
-    ss.setf(std::ios::fixed,std::ios::floatfield);
+    //ss.setf(std::ios::fixed,std::ios::floatfield);
     ss.precision(precision);
     for(size_t r = 0; r < rows; r++){
         for(size_t c = 0; c < cols; c++){

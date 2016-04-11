@@ -20,15 +20,16 @@ int main(int argc, char const *argv[]) {
 
     Matrix compressed = centered * comps;
 
+/*
     cout << "Input: \n" << ps << endl;
     cout << "Centered: \n" << centered << endl;
     cout << "Correlation: \n" << (centered.T()*centered)*(1.0/centered.rows) << endl;
     cout << "Components: \n" << comps << endl;
     cout << "Compressed: \n" << compressed << endl;
     cout << "Reconstruction: \n" << compressed * comps.T() << endl;
-
-/*    cout << compressed.rows << " " << compressed.cols << endl;
-    cout << compressed.toString(16);*/
+*/
+    cout << compressed.rows << " " << compressed.cols << endl;
+    cout << compressed.toString(6);
 
     return 0;
 }
