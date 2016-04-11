@@ -22,7 +22,7 @@ namespace{
 }
 
 Matrix components(const Matrix& m, size_t n){
-    auto cor = m.T()*m;
+    auto cor = m.T()*m*(1.0/m.rows);
     auto tri = Tridiagonalize(cor);
     auto eig = eigen(tri);
 

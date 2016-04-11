@@ -5,33 +5,30 @@
 #include "PtronLayer.hpp"
 #include "util.hpp"
 #include "Input.hpp"
+#include "Transformation.hpp"
 using namespace std;
 
 Sigmoid sig(40.0);
 
 int main(int argc, char const *argv[]) {
-    ProblemSet ps = readProblem(cin);
+    Matrix ps = readMatrix(cin);
 
-    auto norm = columnNormalizer(ps.trainingInput);
-    Matrix trainingInput = norm(ps.trainingInput);
-    Matrix challenge = norm(ps.challenge);
+    auto norm = columnCenterer(ps);
+    Matrix centered = norm(ps);
 
-    cout << "input: " << ps.inputCount << " hidden: " << ps.hiddenCount <<
-                " output: " << ps.outputCount << endl << endl;
+    Matrix comps = components(centered, 10);
 
-    PtronLayer output(ps.hiddenCount, ps.outputCount, 0.01, &sig);
-    /*PtronLayer middle(ps.hiddenCount, &output, 0.01, &sig);
-    PtronLayer hidden(ps.inputCount, &middle, 0.01, &sig);*/
-    PtronLayer hidden(ps.inputCount, &output, 0.01, &sig);
+    Matrix compressed = centered * comps;
 
-    for(size_t i=0; i<50000; i++){
-        hidden.update(trainingInput, ps.trainingOutput);
-    }
+    cout << "Input: \n" << ps << endl;
+    cout << "Centered: \n" << centered << endl;
+    cout << "Correlation: \n" << (centered.T()*centered)*(1.0/centered.rows) << endl;
+    cout << "Components: \n" << comps << endl;
+    cout << "Compressed: \n" << compressed << endl;
+    cout << "Reconstruction: \n" << compressed * comps.T() << endl;
 
-    cout << "hidden W matrix:\n" << hidden.getWeights() << endl;
-    cout << "output W matrix:\n" << output.getWeights() << endl;
-    cout << "BEGIN TESTING" << endl;
-    cout << (ps.challenge | hidden.apply(challenge));
+/*    cout << compressed.rows << " " << compressed.cols << endl;
+    cout << compressed.toString(16);*/
 
     return 0;
 }
