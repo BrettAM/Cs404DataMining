@@ -3,36 +3,28 @@ import sys
 import functools
 import math
 
-#1: hw says not to search the same variable twice, but continous values are
-#       reused here
-#     Solution: filter the variables that remain in datasets as id3 progresses?
-#2: Modification to entropy calculation to favor even trees and prevent
-#       reusing the same Classifier uselessly is not equivalent and might
-#       be wrong on the test dataset
-#     Solution: Classifiers know all possible output classes it can produce
-#       entropy calculations discard Classifiers that result in empty classes
-
 class Feature:
     def __init__(self, args):
         self.name = args[0]
         self.cont = args[1] == "continuous"
-        self.validValues = args[1:] if not self.cont else []
-    def __repr__(self):
-        return self.name
+        self.values = args[1:] if not self.cont else []
     def __str__(self):
+        return self.name
+    def __repr__(self):
         return self.name
 
 class LessThanEQ:
     def __init__(self, val):
-        self.ltval = val
+        self.val = val
+        self.ltval = float(val)
     def prompt(self, ans):
-        return ("<=" if ans else ">") + self.ltval
+        return ("<=" if ans else ">") + str(self.val)
     def __repr__(self):
-        return "LessThanEQ({0.ltval})".format(self)
+        return "LessThanEQ({0.val})".format(self)
     def __str__(self):
-        return "<{0.ltval}".format(self)
+        return "<={0.ltval}".format(self)
     def __call__(self,x):
-        return x <= self.ltval
+        return float(x) <= self.ltval
 
 class Identity:
     def prompt(self, ans):
@@ -52,62 +44,45 @@ class Classifier:
     def prompt(self, ans):
         return "{0}{1}:".format(self.key, self.by.prompt(ans))
     def __repr__(self):
-        return "Classifier({0.key}, {0.by})".format(self)
+        return "Classifier({0.key}, {1})".format(self, repr(self.by))
     def __str__(self):
         return "{0.key}{0.by}".format(self)
     def __call__(self, caseDict):
         return self.by(caseDict.get(self.key, None))
     def __eq__(self, y):
         return self.key == y.key and self.by == y.by
-    def filter(self, data):
-        """ Filter this distinction out of the dataset """
-        result = data.copy()
-        del result[self.key]
-        return result
-    def possibleClasses(self):
-        """ List of possible classes the classifier can produce """
+    def filter(self, dataset):
+        """ Filter this key out of a dataset """
+        newds = dataset.copy()
+        del newds[self.key]
+        return newds
+    def values(self):
+        """ List the possible values """
         if self.by is ident:
-            return self.key.validValues
+            return self.key.values
         else:
             return [True, False]
 
-# def occurances(dicts, Classifier):
-#     """ map different classes to occurance counts in a list of dicts """
-#     values = [Classifier(d) for d in dicts]
-#     def countOccurance(d,v):
-#         d[v] = d.get(v,0) + 1
-#         return d
-#     return functools.reduce(countOccurance, values, {})
-
 def entropy(occurances):
     """ Calculate the entropy represented by an list of occurance counts """
-    # total = sum(occurances)
-    # return sum([-p*math.log2(p) for p in map(lambda c: c/total, occurances)])
-    # total = sum(occurances)
-    # if total == 0:
-    #     return math.inf
-    # rate = [c/total for c in occurances]
-    # return sum([-p*math.log2(p) for p in rate if p != 0])
+    total = sum(occurances)
+    if total == 0:
+        return 0.0 # change to math.inf to disallow empty partitions
+    probability = map(lambda c: c/total, occurances)
+    return sum([-p*math.log2(p) for p in probability if p!=0.0])
 
 def setEntropy(dataset, Classifier):
     """ Calculate the entropy in the data after dividing input by Classifier """
-    #return entropy(occurances(dataset, Classifier).values())
     return entropy([len(v) for v in splitDataset(dataset, Classifier).values()])
 
 def splitDataset(dataset, Classifier):
     """ Return the resulting datasets when input is divided by Classifier """
     def appendCase(d,v):
         k = Classifier(v)
-        (d.setdefault(k,list())).append(v)#Classifier.filter(v))
+        d[k].append(Classifier.filter(v))
         return d
-    emptyDict = {key:[] for key in Classifier.possibleClasses()}
-    return functools.reduce(appendCase, dataset, emptyDict)
-    #d[Classifier(v)].append(Classifier.filter(v))
-    # def appendCase(d,v):
-    #     k = Classifier(v)
-    #     (d.setdefault(k,list())).append(v)
-    #     return d
-    # return functools.reduce(appendCase, dataset, {})
+    emptyMap = {k:[] for k in Classifier.values()}
+    return functools.reduce(appendCase, dataset, emptyMap)
 
 def entropyGain(dataset, splitClass, entroClass):
     """ the entropy gain WRT entroClass when dataset is split by splitClass """
@@ -117,9 +92,8 @@ def entropyGain(dataset, splitClass, entroClass):
 
 def findAllClasses(dataset):
     """ Return a list of all Classifiers applicable to this dataset """
-    #ugly
     classes = []
-    for f in dataset[0].keys():
+    for f in dataset[0].keys(): #really wish I had flatMap
         if not f.cont:
             classes.append(Classifier(f))
         else:
@@ -129,38 +103,57 @@ def findAllClasses(dataset):
 
 def id3(dataset, solveFeature):
     if setEntropy(dataset, solveFeature) == 0.0:
-        return (str(solveFeature(dataset[0])), [])
+        if len(dataset) == 0:
+            return [defaultAnswer, []]
+        else:
+            return (str(solveFeature(dataset[0])), [])
     classes = [c for c in findAllClasses(dataset) if not c == solveFeature]
     classes = [(entropyGain(dataset, c, solveFeature), c) for c in classes]
     classes = [c for c in classes if not math.isnan(c[0])]
     classes.sort(key=lambda c: c[0])
 
-    print(classes)
+    #print(dataset)
+    #for (e,c) in classes:
+    #    print(e,c)
 
     if len(classes) == 0:
-        print(dataset)
+        #return (defaultAnswer, [])
         return ("Out of features", [])
 
     sdata = splitDataset(dataset, classes[0][1])
-    # if list(sdata.values())[0] == dataset: #ugly way to detect no progress
-    #     return ("Out of features", [])
+
+    #for f,d in sdata.items():
+    #    print(f,d)
+    #print()
 
     return (classes[0][1], [(k, id3(v,solveFeature)) for k,v in sdata.items()])
 
 def displayTree(tree, ident):
     question = tree[0]
-    if len(tree[1]) == 0: #ugly way to print tree leaves
+    if len(tree[1]) == 0: #leaf
         print(" "*ident + question)
     for (ans, nt) in tree[1]:
         print(" "*ident + question.prompt(ans))
         displayTree(nt, ident+4)
 
 #input
+def fixHumiTypo(line):
+    result = []
+    for word in line:
+        if word == 'Humi':
+            result.append('Humid')
+        else:
+            result.append(word)
+    return result
+
 featureCount = int(input())+1
 featureLines = [input().split() for i in range(0, featureCount)]
 features = [Feature(l) for l in featureLines]
 
-data = [dict(zip(features, l.split())) for l in sys.stdin.readlines()]
+defaultAnswer = next(x for x in features if x.name == "Ans").values[0]
+
+data = [dict(zip(features, fixHumiTypo(l.split())))
+                for l in sys.stdin.readlines()]
 
 result = id3(data, Classifier(features[-1]))
 displayTree(result, 0)
