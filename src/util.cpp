@@ -1,6 +1,6 @@
 #include "util.hpp"
 
-std::function<Matrix(Matrix)> columnNormalizer(Matrix input){
+std::function<Matrix(Matrix)> columnNormalizer(const Matrix& input){
     std::vector<double> shift(input.cols);
     std::vector<double> scale(input.cols);
 

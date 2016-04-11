@@ -5,7 +5,7 @@
 #include "matrix.hpp"
 
 /** returns a (Matrix)=>Matrix that column normalizez the input matrix */
-std::function<Matrix(Matrix)> columnNormalizer(Matrix input);
+std::function<Matrix(Matrix)> columnNormalizer(const Matrix& input);
 /** return a random value suited for initialing a NN weight matrix */
 double randVal();
 /** Add a column of -1's to the right of the matrix m*/
