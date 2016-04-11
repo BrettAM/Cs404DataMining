@@ -6,9 +6,7 @@ import math
 #1: hw says not to search the same variable twice, but continous values are
 #       reused here
 #     Solution: filter the variables that remain in datasets as id3 progresses?
-#2: Modification to entropy calculation to favor even trees and prevent
-#       reusing the same Classifier uselessly is not equivalent and might
-#       be wrong on the test dataset
+#2: Empty splits could be asked
 #     Solution: Classifiers know all possible output classes it can produce
 #       entropy calculations discard Classifiers that result in empty classes
 
@@ -30,7 +28,7 @@ class LessThanEQ:
     def __repr__(self):
         return "LessThanEQ({0.ltval})".format(self)
     def __str__(self):
-        return "<{0.ltval}".format(self)
+        return "<={0.ltval}".format(self)
     def __call__(self,x):
         return x <= self.ltval
 
@@ -71,43 +69,34 @@ class Classifier:
         else:
             return [True, False]
 
-# def occurances(dicts, Classifier):
-#     """ map different classes to occurance counts in a list of dicts """
-#     values = [Classifier(d) for d in dicts]
-#     def countOccurance(d,v):
-#         d[v] = d.get(v,0) + 1
-#         return d
-#     return functools.reduce(countOccurance, values, {})
+def occurances(dicts, Classifier):
+    """ map different classes to occurance counts in a list of dicts """
+    values = [Classifier(d) for d in dicts]
+    def countOccurance(d,v):
+        d[v] += 1
+        return d
+    emptyDict = {key:0 for key in Classifier.possibleClasses()}
+    return functools.reduce(countOccurance, values, emptyDict)
 
 def entropy(occurances):
     """ Calculate the entropy represented by an list of occurance counts """
-    # total = sum(occurances)
-    # return sum([-p*math.log2(p) for p in map(lambda c: c/total, occurances)])
-    # total = sum(occurances)
-    # if total == 0:
-    #     return math.inf
-    # rate = [c/total for c in occurances]
-    # return sum([-p*math.log2(p) for p in rate if p != 0])
+    total = sum(occurances)
+    if total == 0:
+        return math.inf
+    rate = [c/total for c in occurances]
+    return sum([-p*math.log2(p) for p in rate if p != 0])
 
 def setEntropy(dataset, Classifier):
     """ Calculate the entropy in the data after dividing input by Classifier """
-    #return entropy(occurances(dataset, Classifier).values())
-    return entropy([len(v) for v in splitDataset(dataset, Classifier).values()])
+    return entropy(occurances(dataset, Classifier).values())
 
 def splitDataset(dataset, Classifier):
     """ Return the resulting datasets when input is divided by Classifier """
     def appendCase(d,v):
-        k = Classifier(v)
-        (d.setdefault(k,list())).append(v)#Classifier.filter(v))
+        d[Classifier(v)].append(Classifier.filter(v))
         return d
     emptyDict = {key:[] for key in Classifier.possibleClasses()}
     return functools.reduce(appendCase, dataset, emptyDict)
-    #d[Classifier(v)].append(Classifier.filter(v))
-    # def appendCase(d,v):
-    #     k = Classifier(v)
-    #     (d.setdefault(k,list())).append(v)
-    #     return d
-    # return functools.reduce(appendCase, dataset, {})
 
 def entropyGain(dataset, splitClass, entroClass):
     """ the entropy gain WRT entroClass when dataset is split by splitClass """
@@ -132,18 +121,22 @@ def id3(dataset, solveFeature):
         return (str(solveFeature(dataset[0])), [])
     classes = [c for c in findAllClasses(dataset) if not c == solveFeature]
     classes = [(entropyGain(dataset, c, solveFeature), c) for c in classes]
-    classes = [c for c in classes if not math.isnan(c[0])]
     classes.sort(key=lambda c: c[0])
 
-    print(classes)
-
     if len(classes) == 0:
-        print(dataset)
         return ("Out of features", [])
 
+    classifier = classes[0][1]
+    print(classifier)
+    for d in dataset:
+        print("\t",classifier(d), d)
+
+    # print(classes[0][1])
     sdata = splitDataset(dataset, classes[0][1])
-    # if list(sdata.values())[0] == dataset: #ugly way to detect no progress
-    #     return ("Out of features", [])
+    # print(dataset)
+    # for k,v in sdata.items():
+    #     print(k,v)
+    # print()
 
     return (classes[0][1], [(k, id3(v,solveFeature)) for k,v in sdata.items()])
 

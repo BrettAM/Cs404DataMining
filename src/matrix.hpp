@@ -1,6 +1,7 @@
 #pragma once
 #include <array>
 #include <assert.h>
+#include <cmath>
 #include <functional>
 #include <ostream>
 #include <sstream>
@@ -31,6 +32,14 @@ public:
     Matrix(std::initializer_list<std::initializer_list<double>> values);
     ~Matrix();
     Matrix(const Matrix& other);
+    /** returns a nxn identity matrix */
+    static Matrix Ident(size_t n);
+    /** Construct a Householder transformation around v
+      * v - a column vector defining a hyperplane
+      * returns a Householder matrix which reflects vectors across
+      *     the hyperplace defined by v
+      */
+    static Matrix Householder(const Matrix& v);
     /** return the value at `row` and `column` indexed at 0
       * defined here for inlining
       */
@@ -60,6 +69,10 @@ public:
     void map(std::function<double(double)> transform);
     /** Returns the element-wise product of this and rhs */
     Matrix elmult(const Matrix& rhs);
+    /** Returns the Frobenius norm of this matrix */
+    double frobeniusNorm() const;
+    /** Returns a similar matrix which a unit Frobenius norm */
+    Matrix frobeniusNormalized() const;
     /** Make a string for displaying the state of this matrix */
     std::string toString(int precision) const;
     /** add correspending elements in `rhs` to this matrix */
@@ -72,6 +85,8 @@ public:
     Matrix  operator* (const Matrix& rhs) const;
     /** construct a matrix of this and `rhs` concatenated left to right */
     Matrix  operator| (const Matrix& rhs) const;
+    /** copy this matrix over this one */
+    Matrix& operator=(const Matrix&);
     /** construct a matrix that is the elementwise product of this and scalar */
     friend Matrix operator* (double scalar, const Matrix& rhs);
     friend Matrix operator* (const Matrix& rhs, double scalar);

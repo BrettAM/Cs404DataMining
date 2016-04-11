@@ -191,3 +191,41 @@ TEST(Concatenate) {
         }
     }
 }
+
+TEST(IdentFactory) {
+    Matrix a = {{1, 2}, {3, 4}};
+    Matrix p = a*Matrix::Ident(2);
+    for(size_t r=0; r<a.rows; r++){
+        for(size_t c=0; c<a.cols; c++){
+            CHECK_EQUAL(p.get(r,c), a.get(r,c));
+        }
+    }
+}
+
+TEST(HouseholderFactory) {
+    Matrix a = {{1.0},{1.0},{0.0}};
+    Matrix p = Matrix::Householder(a)*a;
+    for(size_t r=0; r<a.rows; r++){
+        for(size_t c=0; c<a.cols; c++){
+            CHECK_CLOSE(p.get(r,c),-a.get(r,c), 0.00000001);
+        }
+    }
+}
+
+TEST(FrobeniusNorm) {
+    Matrix a = {{0.0, 3.0}, {4.0, 0.0}};
+    CHECK_EQUAL(a.frobeniusNorm(), 5.0);
+}
+
+TEST(FrobeniusNormalized) {
+    Matrix a = {{0.0, 3.0}, {4.0, 0.0}};
+    Matrix r = a.frobeniusNormalized();
+    CHECK_EQUAL(r.frobeniusNorm(), 1.0);
+}
+
+TEST(Assignment) {
+    Matrix a = {{1.0}};
+    Matrix b = {{0.0}};
+    b = a;
+    CHECK_EQUAL(b.get(0,0), 1.0);
+}

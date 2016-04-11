@@ -31,6 +31,32 @@ Matrix::Matrix(const Matrix& other)
     data = new double[rows*cols];
     std::copy(other.data, other.data+rows*cols, data);
 }
+Matrix& Matrix::operator=(const Matrix& other){
+    assert(rows == other.rows);
+    assert(cols == other.cols);
+    for(size_t r=0; r<rows; r++){
+        for(size_t c=0; c<cols; c++){
+            set(r,c, other.get(r,c));
+        }
+    }
+    return *this;
+}
+Matrix Matrix::Ident(size_t n){
+    Matrix r(n, n, 0.0);
+    for(size_t i=0; i<n; i++) r.set(i, i, 1.0);
+    return r;
+}
+/** Construct a Householder transformation around v
+  * v the unit column vector defining a hyperplane
+  * returns a Householder matrix which reflects vectors across
+  *     the hyperplace defined by v
+  */
+Matrix Matrix::Householder(const Matrix& v){
+    assert(v.cols == 1);
+    double n = v.frobeniusNorm();
+    Matrix hh = Ident(v.rows) - v*v.T()*(2.0/(n*n));
+    return hh;
+}
 Matrix Matrix::T() const{ //transpose
     Matrix nm(cols, rows);
     for(size_t r = 0; r < rows; r++){
@@ -81,6 +107,22 @@ Matrix Matrix::elmult(const Matrix& rhs){
         }
     }
     return res;
+}
+double Matrix::frobeniusNorm() const{
+    double sum = 0.0;
+    for(size_t r = 0; r < rows; r++){
+        for(size_t c = 0; c < cols; c++){
+            double e = get(r,c);
+            sum += e*e;
+        }
+    }
+    return sqrt(sum);
+}
+Matrix Matrix::frobeniusNormalized() const{
+    Matrix r(*this);
+    double m = 1.0 / frobeniusNorm();
+    r.map([=](double v){return v*m;});
+    return r;
 }
 std::string Matrix::toString(int precision) const{
     std::stringstream ss;
