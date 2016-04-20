@@ -14,3 +14,10 @@ double randVal();
 Matrix addBias(const Matrix& m);
 /** remive the rightmost column of a matrix m */
 Matrix stripBias(const Matrix& m);
+/** return val bounded by min and max */
+template <typename T>
+T constrain(T min, T val, T max){
+    T mind = (val  < min)? min : val;
+    T maxd = (mind > max)? max : mind;
+    return maxd;
+}

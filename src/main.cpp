@@ -10,94 +10,122 @@
 #include <cmath>
 using namespace std;
 
-template <typename T>
-T constrain(T min, T val, T max){
-    T mind = (val  < min)? min : val;
-    T maxd = (mind > max)? max : mind;
-    return maxd;
-}
-
-class Cliff : public QModel {
-public:
-    /**
-    ....
-    ....
-    ....
-    S__E
-    **/
-    Cliff(): QModel(4, Pos(4,4)) {}
-    Pos startValue(){ return Pos(0,3); }
-    Pos move(Pos i, int d){
-        int dx = 0, dy = 0;
-        switch (d) {
-            case 0: //DOWN
-                dx = 0;
-                dy = 1;
-                break;
-            case 1: //UP
-                dx = 0;
-                dy = -1;
-                break;
-            case 2: //LEFT
-                dx = -1;
-                dy = 0;
-                break;
-            case 3: //RIGHT
-                dx = 1;
-                dy = 0;
-                break;
-        }
-        int nx = constrain(0, i.x + dx, 3);
-        int ny = constrain(0, i.y + dy, 3);
-        return Pos(nx, ny);
-    }
-    bool terminal(Pos p){ return (p.x == 3 && p.y == 3); }
-    double reward(Pos p){
-        if(p.x == 3 && p.y == 3) return  100;
-        if(p.x >= 1 && p.y == 3) return -100;
-        return -1;
-    }
-};
-
+/**
+x coord -> position -> -1.20:0.05:0.80
+y coord -> velocity -> -0.07:0.01:0.07
+**/
 class MCar : public QModel {
 public:
-    /**
-    x coord -> position -> -1.20:0.05:0.80
-    y coord -> velocity -> -0.07:0.01:0.07
-    **/
-    MCar(): QModel(3, Pos(41,15)) {}
-    Pos startValue(){ return Pos(0,0); }
-    Pos move(Pos i, int d){
-        double v = ((double)i.y) * 0.01 - 0.07;
-        double x = ((double)i.x) * 0.05 - 1.20;
-        double a = 0.01*((double)d-1.0) - 0.025*cos(3.0*x);
-        double nv = constrain(-0.07, v+a,  0.07);
-        double nx = constrain(-1.20, x+nv, 0.80);
-        int xpos = ((nx+1.20)/0.05);
-        int ypos = ((nv+0.07)/0.01);
-        return Pos(xpos, ypos);
+    static constexpr int XSTATES = 41;
+    static constexpr int VSTATES = 15;
+    static constexpr int MOVECNT =  3;
+    class State : public QModel::PosData {
+    public:
+        const double x;
+        const double v;
+        static int indexOf(double x, double v){
+            int xpos = ((x+1.20)/0.05);
+            int vpos = ((v+0.07)/0.01);
+            return xpos*VSTATES+vpos;
+        }
+        State(double x, double v): PosData(indexOf(x,v)), x(x), v(v) {}
+        std::string toString(){
+            std::stringstream ss;
+            ss << "(" << x << "," << v << ")";
+            return ss.str();
+        }
+    };
+    MCar(): QModel(MOVECNT, XSTATES*VSTATES) {}
+    Pos startValue(){ return Pos(new State(0.0,0.0)); }
+    Pos move(const Pos& p, int d){
+        State* s = (State*) p.get();
+        double action = d-1;
+        double a = 0.001*action - 0.0025*cos(3.0*s->x);
+        double nv = constrain(-0.07, s->v+a,  0.07);
+        double nx = constrain(-1.20, s->x+nv, 0.80);
+        return Pos(new State(nx, nv));
     }
-    bool terminal(Pos p){ return (p.x == 40); }
-    double reward(Pos p){ return (p.x==40)? 1.0 : -1.0; }
+    bool terminal(const Pos& p){
+        State* s = (State*) p.get();
+        return (s->x >= 0.8);
+    }
+    double reward(const Pos& p){
+        State* s = (State*) p.get();
+        return (s->x >= 0.8)? 1.0 : -1.0;
+    }
 };
 
 int main(int argc, char const *argv[]) {
     MCar cl;
-    QLearner m(cl, 0.1, 1.0);
-
-    //cout << m.toString(3) << endl;
-    for(int i = 0; i<100; i++){
-        m.train(0.2);
-        //cout << m.toString(3) << endl;
+    QLearner m(cl, 0.05, 0.8);
+    for(int i=0; i<100; i++){
+        m.train(0.3);
     }
-    cout << m.toString(3) << endl;
+
+    // construct Q matrix
+    for(int v=0; v<MCar::MOVECNT; v++){
+        cout << MCar::VSTATES << " " << MCar::XSTATES << endl;
+        for(int x=0; x<MCar::XSTATES; x++){
+            for(int y=0; y<MCar::VSTATES; y++){
+                double X = ((double)x)*0.05 - 1.20;
+                double Y = ((double)y)*0.01 - 0.07;
+                cout << m.moveValue(Pos(new MCar::State(X,Y)), v) << " ";
+            }
+            cout << endl;
+        }
+        cout << endl;
+    }
 
     Pos s = cl.startValue();
-    for(int i=0; i<1000; i++){
+    for(int i=0; i<250; i++){
         if(cl.terminal(s)) break;
-        s = m.getNext(s);
-        cerr << "at " << s.x << " " << s.y << endl;
+        s = std::move(m.getNext(s));
+        cerr << s->toString() << endl;
     }
 
     return 0;
 }
+
+/*
+class Cliff : public QModel {
+//....
+//....
+//....
+//S__E
+public:
+    class State : public QModel::PosData {
+    public:
+        const int x;
+        const int y;
+        State(int x, int y): PosData(x*4 + y), x(x), y(y) {}
+        std::string toString(){
+            std::stringstream ss;
+            ss << "(" << x << "," << y << ")";
+            return ss.str();
+        }
+    };
+    Cliff(): QModel(4,16) {}
+    Pos startValue(){
+        //return Pos(0,3);
+        return Pos(new State(0,3));
+    }
+    Pos move(const Pos& p, int d){
+        State* s = (State*) p.get();
+        const int moveMatr[4][2] = {{0, 1}, {0, -1}, {-1, 0}, {1, 0}};
+                                   //DOWN   UP       LEFT     RIGHT
+        int nx = constrain(0, s->x + moveMatr[d][0], 3);
+        int ny = constrain(0, s->y + moveMatr[d][1], 3);
+        return Pos(new State(nx, ny));
+    }
+    bool terminal(const Pos& p){
+        State* s = (State*) p.get();
+        return (s->x == 3 && s->y == 3);
+    }
+    double reward(const Pos& p){
+        State* s = (State*) p.get();
+        if(s->x == 3 && s->y == 3) return  100;
+        if(s->x >= 1 && s->y == 3) return -100;
+        return -1;
+    }
+};
+*/
