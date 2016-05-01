@@ -27,6 +27,8 @@
 *.out
 *.app
 nn
+pca
+ql
 testrunner
 
 # Test files

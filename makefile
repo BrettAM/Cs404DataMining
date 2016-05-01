@@ -9,7 +9,7 @@ HPPS=$(wildcard $(SDIR)/*.hpp)
 CPPS=$(filter-out $(MAIN), $(wildcard $(SDIR)/*.cpp))
 OBJS=$(addprefix $(ODIR)/,$(notdir $(CPPS:.cpp=.o)))
 TESTS=$(wildcard $(TDIR)/*.cpp)
-EXECUTABLE=pca
+EXECUTABLE=ql
 INC=-I$(SDIR)
 TESTLIB=-I/usr/local/include/UnitTest++ -lUnitTest++
 TESTCMD=testrunner
