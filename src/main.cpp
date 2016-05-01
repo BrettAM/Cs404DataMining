@@ -14,8 +14,12 @@ using namespace std;
 x coord -> position -> -1.20:0.05:0.80
 y coord -> velocity -> -0.07:0.01:0.07
 **/
+
 class MCar : public QModel {
 public:
+    std::default_random_engine gen;
+    std::uniform_real_distribution<double> posRand;
+    std::uniform_real_distribution<double> velRand;
     static constexpr int XSTATES = 41;
     static constexpr int VSTATES = 15;
     static constexpr int MOVECNT =  3;
@@ -35,8 +39,14 @@ public:
             return ss.str();
         }
     };
-    MCar(): QModel(MOVECNT, XSTATES*VSTATES) {}
-    Pos startValue(){ return Pos(new State(0.0,0.0)); }
+    MCar(): QModel(MOVECNT, XSTATES*VSTATES) {
+        gen.seed(time(NULL));
+        posRand = uniform_real_distribution<double>(-1.20, 0.80);
+        velRand = uniform_real_distribution<double>(-0.07, 0.07);
+    }
+    Pos startValue(){
+        return Pos(new State(posRand(gen),velRand(gen)));
+    }
     Pos move(const Pos& p, int d){
         State* s = (State*) p.get();
         double action = d-1;
@@ -55,38 +65,6 @@ public:
     }
 };
 
-int main(int argc, char const *argv[]) {
-    MCar cl;
-    QLearner m(cl, 0.05, 0.8);
-    for(int i=0; i<100; i++){
-        m.train(0.3);
-    }
-
-    // construct Q matrix
-    for(int v=0; v<MCar::MOVECNT; v++){
-        cout << MCar::VSTATES << " " << MCar::XSTATES << endl;
-        for(int x=0; x<MCar::XSTATES; x++){
-            for(int y=0; y<MCar::VSTATES; y++){
-                double X = ((double)x)*0.05 - 1.20;
-                double Y = ((double)y)*0.01 - 0.07;
-                cout << m.moveValue(Pos(new MCar::State(X,Y)), v) << " ";
-            }
-            cout << endl;
-        }
-        cout << endl;
-    }
-
-    Pos s = cl.startValue();
-    for(int i=0; i<250; i++){
-        if(cl.terminal(s)) break;
-        s = std::move(m.getNext(s));
-        cerr << s->toString() << endl;
-    }
-
-    return 0;
-}
-
-/*
 class Cliff : public QModel {
 //....
 //....
@@ -128,4 +106,36 @@ public:
         return -1;
     }
 };
-*/
+
+
+int main(int argc, char const *argv[]) {
+    MCar cl;
+    QLearner m(cl, 0.05, 0.8);
+    for(int i=0; i<500; i++){
+        m.train(0.3);
+    }
+
+    // construct Q matrix
+    for(int v=0; v<MCar::MOVECNT; v++){
+        cout << MCar::VSTATES << " " << MCar::XSTATES << endl;
+        for(int x=0; x<MCar::XSTATES; x++){
+            for(int y=0; y<MCar::VSTATES; y++){
+                double X = ((double)x)*0.05 - 1.20;
+                double Y = ((double)y)*0.01 - 0.07;
+                cout << m.moveValue(Pos(new MCar::State(X,Y)), v) << " ";
+            }
+            cout << endl;
+        }
+        cout << endl;
+    }
+
+    Pos s = cl.startValue();
+    for(int i=0; i<500; i++){
+        if(cl.terminal(s)) break;
+        s = std::move(m.getNext(s));
+        cerr << s->toString() << endl;
+    }
+
+    return 0;
+}
+
