@@ -13,7 +13,7 @@ EXECUTABLE=ql
 INC=-I$(SDIR)
 TESTLIB=-I/usr/local/include/UnitTest++ -lUnitTest++
 TESTCMD=testrunner
-OUTPUTTAR=BrettAM_NN.tar
+OUTPUTTAR=BrettAM_HW.tar
 
 all: init $(EXECUTABLE)
 
@@ -35,3 +35,6 @@ tar: test
 
 clean:
 	rm -f $(OUTPUTTAR) $(OBJS) $(EXECUTABLE) $(TESTCMD)
+
+run: $(EXECUTABLE)
+	./$(EXECUTABLE)
