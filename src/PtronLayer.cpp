@@ -6,12 +6,14 @@ using namespace std;
 //public
 PtronLayer::PtronLayer(int numInputs, int numOutputs, double learnRate, DecisionFunc* step)
         : step(step), lRate(learnRate), next(NULL),
-          numInputs(numInputs), numOutputs(numOutputs), weights(numInputs+1, numOutputs) {
+          weights(numInputs+1, numOutputs),
+          numInputs(numInputs), numOutputs(numOutputs) {
     weights.map([](double){ return randVal(); });
 }
 PtronLayer::PtronLayer(int numInputs, PtronLayer* next, double learnRate, DecisionFunc* step)
         : step(step), lRate(learnRate), next(next),
-          numInputs(numInputs), numOutputs(next->numInputs), weights(numInputs+1, next->numInputs) {
+          weights(numInputs+1, next->numInputs),
+          numInputs(numInputs), numOutputs(next->numInputs) {
     weights.map([](double){ return randVal(); });
 }
 

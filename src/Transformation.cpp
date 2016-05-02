@@ -4,13 +4,13 @@
 using namespace std;
 
 namespace{
-    Matrix getColumn(const Matrix& s, size_t c){
+/*    Matrix getColumn(const Matrix& s, size_t c){
         Matrix res(s.rows, 1);
         for(size_t i=0; i<s.cols; i++){
             res.set(i,0,s.get(i,c));
         }
         return res;
-    }
+    }*/
 
     double pythag(double a, double b) {
         double absa, absb;
