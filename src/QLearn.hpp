@@ -51,8 +51,6 @@ private:
     std::uniform_int_distribution<int> moves;
     /** return bestValue with probability eps, otherwise a random move index */
     int epsGreedy(double eps, int bestValue);
-    /** return the best move index at position p */
-    int bestMove(const Pos& p) const;
     /** return the best move value at position p */
     double maxValue(const Pos& p) const;
 public:
@@ -68,6 +66,8 @@ public:
     void train(double eps);
     /** query the next move that a greedy algorithm would make at Pos s */
     Pos getNext(const Pos& s) const;
+    /** return the best move index at position p */
+    int bestMove(const Pos& p) const;
     /** query the value of a given move from position s */
     double moveValue(const Pos& s, int move) const;
     //std::string toString(int precision) const;

@@ -45,7 +45,7 @@ public:
         velRand = uniform_real_distribution<double>(-0.07, 0.07);
     }
     Pos startValue(){
-        return Pos(new State(posRand(gen),velRand(gen)));
+        return Pos(new State(posRand(gen),0.0/*velRand(gen)*/));
     }
     Pos move(const Pos& p, int d){
         State* s = (State*) p.get();
@@ -57,11 +57,15 @@ public:
     }
     bool terminal(const Pos& p){
         State* s = (State*) p.get();
-        return (s->x >= 0.8);
+        if(s->x <= -1.2) return true;
+        if(s->x >= 0.8) return true;
+        return false;
     }
     double reward(const Pos& p){
         State* s = (State*) p.get();
-        return (s->x >= 0.8)? 1.0 : -1.0;
+        if(s->x <= -1.20) return -25.0;
+        if(s->x >= 0.8) return 25.0;
+        return -1;
     }
 };
 
@@ -110,32 +114,73 @@ public:
 
 int main(int argc, char const *argv[]) {
     MCar cl;
-    QLearner m(cl, 0.05, 0.8);
-    for(int i=0; i<500; i++){
-        m.train(0.3);
+    QLearner m(cl, 0.075, 0.9);
+
+    // Train the QLearner
+    for(int i=0; i<10000; i++){
+        m.train(0.4);
     }
 
-    // construct Q matrix
-    for(int v=0; v<MCar::MOVECNT; v++){
+    // Output Q matrix
+    cout.precision(5);
+    //for(int v=0; v<MCar::MOVECNT; v++){
+    for(int v=MCar::MOVECNT-1; v>=0; v--){
         cout << MCar::VSTATES << " " << MCar::XSTATES << endl;
-        for(int x=0; x<MCar::XSTATES; x++){
-            for(int y=0; y<MCar::VSTATES; y++){
+        for(int y=0; y<MCar::VSTATES; y++){
+            for(int x=0; x<MCar::XSTATES; x++){
                 double X = ((double)x)*0.05 - 1.20;
                 double Y = ((double)y)*0.01 - 0.07;
                 cout << m.moveValue(Pos(new MCar::State(X,Y)), v) << " ";
+                //cout << ((x==0)? -1 : ( (y==0)? -2 : v)) << " ";
             }
             cout << endl;
         }
         cout << endl;
     }
 
-    Pos s = cl.startValue();
-    for(int i=0; i<500; i++){
-        if(cl.terminal(s)) break;
+    // Show an action chart
+    for(int x=0; x<MCar::XSTATES; x++){
+        for(int y=0; y<MCar::VSTATES; y++){
+            double X = ((double)x)*0.05 - 1.20;
+            double Y = ((double)y)*0.01 - 0.07;
+            auto P = Pos(new MCar::State(X,Y));
+            auto a = m.bestMove(P);
+            cout << ((a == 0)? 'R' : ((a == 2)? 'F' : '.')) << " ";
+        }
+        cout << endl;
+    }
+
+
+    // Run a trial simulation with greedy evaluation
+    int pass = 0;
+    int fall = 0;
+    const int Trials = 10000;
+    for(int j=0; j<Trials; j++){
+        Pos s = cl.startValue();
+        for(int i=0; i<180; i++){
+            if(cl.terminal(s)) {
+                if(cl.reward(s) > 0) pass++;
+                else fall++;
+                break;
+            }
+            s = std::move(m.getNext(s));
+            //cerr << s->toString() << endl;
+        }
+    }
+    cout << "Passed: " << pass
+         << " Fell: "  << fall
+         << " Time: "  << Trials-pass-fall << endl;
+
+/*    Pos s = cl.startValue();
+    for(int i=0; i<180; i++){
+        if(cl.terminal(s)) {
+            pass++;
+            break;
+        }
         s = std::move(m.getNext(s));
         cerr << s->toString() << endl;
     }
-
+*/
     return 0;
 }
 
