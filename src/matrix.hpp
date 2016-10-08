@@ -7,15 +7,6 @@
 #include <sstream>
 #include <string>
 
-/**
- * Things that would be nice:
- * exceptions instead of assertions
- * value comparison operator
- * determinant operator
- * solve for vector function
- * print matrix with optimally lined up columns
- */
-
 class Matrix{
 private:
     double* data; //rows by columns
@@ -37,7 +28,7 @@ public:
     /** Construct a Householder transformation around v
       * v - a column vector defining a hyperplane
       * returns a Householder matrix which reflects vectors across
-      *     the hyperplace defined by v
+      *     the hyperplane defined by v
       */
     static Matrix Householder(const Matrix& v);
     /** return the value at `row` and `column` indexed at 0
@@ -58,7 +49,7 @@ public:
     }
     /** return a Matrix that is the transpose of this one */
     Matrix T() const;
-    /** return a pair of matricies,
+    /** return a pair of matrices,
       * one with the first `column` columns
       * and another with the rest
       */
@@ -75,7 +66,7 @@ public:
     Matrix frobeniusNormalized() const;
     /** Make a string for displaying the state of this matrix */
     std::string toString(int precision) const;
-    /** add correspending elements in `rhs` to this matrix */
+    /** add corresponding elements in `rhs` to this matrix */
     Matrix& operator+= (const Matrix& rhs);
     /** construct a matrix that is the elementwise difference of this and rhs */
     Matrix  operator- (const Matrix& rhs) const;

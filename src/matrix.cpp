@@ -49,7 +49,7 @@ Matrix Matrix::Ident(size_t n){
 /** Construct a Householder transformation around v
   * v the unit column vector defining a hyperplane
   * returns a Householder matrix which reflects vectors across
-  *     the hyperplace defined by v
+  *     the hyperplane defined by v
   */
 Matrix Matrix::Householder(const Matrix& v){
     assert(v.cols == 1);

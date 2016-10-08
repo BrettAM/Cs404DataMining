@@ -12,7 +12,7 @@ std::function<Matrix(Matrix)> columnCenterer(const Matrix& input);
 double randVal();
 /** Add a column of -1's to the right of the matrix m*/
 Matrix addBias(const Matrix& m);
-/** remive the rightmost column of a matrix m */
+/** remove the rightmost column of a matrix m */
 Matrix stripBias(const Matrix& m);
 /** return val bounded by min and max */
 template <typename T>

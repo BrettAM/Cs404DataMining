@@ -19,32 +19,21 @@ PtronLayer::PtronLayer(int numInputs, PtronLayer* next, double learnRate, Decisi
 
 
 Matrix PtronLayer::update(const Matrix& input, const Matrix& expected){
-    //cerr << input << endl;
-
     auto fullInput = addBias(input); //(n)x(numInputs+1)
-    //cerr << "fullInput" << endl;
     auto values = step->apply(fullInput * weights);
-    //cerr << "values" << endl;
     auto result = values.first; //(n)x(numOutputs)
-    //cerr << "result" << endl;
     auto derivative = values.second; //(n)x(numOutputs)
-    //cerr << "derivative" << endl;
 
     //(n)x(numOutputs)
     Matrix error = (next == NULL)? (expected - result)
                                  : next->update(result, expected);
 
-    //cerr << "error" << endl;
     Matrix errorGrad = error.elmult(derivative); //(n)x(numOutputs)
-    //cerr << "errorGrad" << endl;
 
     auto delta = fullInput.T() * errorGrad; //(numInputs+1)x(numOutputs)
-    //cerr << "delta" << endl;
     auto inputGrad = stripBias(errorGrad * weights.T()); //(n)x(numInputs)
-    //cerr << "inputGrad" << endl;
 
     weights += (lRate * delta); //(numInputs+1)x(numOutputs)
-    //cerr << "weights" << endl;
 
     return inputGrad;
 }

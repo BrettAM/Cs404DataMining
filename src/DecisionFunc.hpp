@@ -8,7 +8,7 @@ public:
     virtual double calculate(double val)  const = 0;
     /** get the derivative of the decision function at a value */
     virtual double derivative(double val) const = 0;
-    /** get the value and derivative matricies from val */
+    /** get the value and derivative matrices from val */
     virtual std::pair<Matrix, Matrix> apply(Matrix val) const {
         Matrix value(val);
         Matrix deriv(val);
