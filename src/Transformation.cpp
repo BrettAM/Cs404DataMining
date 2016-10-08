@@ -4,14 +4,6 @@
 using namespace std;
 
 namespace{
-/*    Matrix getColumn(const Matrix& s, size_t c){
-        Matrix res(s.rows, 1);
-        for(size_t i=0; i<s.cols; i++){
-            res.set(i,0,s.get(i,c));
-        }
-        return res;
-    }*/
-
     double pythag(double a, double b) {
         double absa, absb;
         absa=fabs(a);
@@ -53,6 +45,13 @@ Matrix components(const Matrix& m, size_t n){
     return res;
 }
 
+/**
+ * Original attempt at tridiagonalize algorithm using material from my
+ * Numerical Linear Algebra class. It works, but ended up being very slow;
+ * I switched to the algorithm provided by the Professor below thats been highly
+ * optimized so the neural network would finish within the test server's time
+ * limits.
+ */
 /*hhTridiag Tridiagonalize(const Matrix& s){
     Matrix tri(s);
     Matrix trans = Matrix::Ident(s.cols);
@@ -60,7 +59,7 @@ Matrix components(const Matrix& m, size_t n){
         // get the column to zero
         Matrix col = getColumn(tri, c);
         double sub = col.get(c+1,0);
-        // calculate the axis of refletion to zero col
+        // calculate the axis of reflection to zero col
         double a = 0;
         for(size_t j=c+1; j<s.cols; j++){
             auto q = col.get(j,0);
@@ -73,7 +72,7 @@ Matrix components(const Matrix& m, size_t n){
         for(size_t i=c+2; i<s.cols; i++){
             v.set(i,0, col.get(i,0)/(2*r) );
         }
-        // apply a housholder reflection matrix across v to tri
+        // apply a householder reflection matrix across v to tri
         Matrix hh = Matrix::Householder(v);
         tri = hh * tri * hh;
         trans = hh * trans;
@@ -89,6 +88,10 @@ hhTridiag Tridiagonalize(const Matrix& s){
             a[i][j] = s.get(i,j);
         }
     }
+
+    /////////////////////////////////////////////
+    // algorithm below provided for CS404 class
+
     double d[n];
     double e[n];
     for(int i=0; i<n; i++){
@@ -185,6 +188,9 @@ hhTridiag Tridiagonalize(const Matrix& s){
         }
     }
 
+    // end foreign algorithm
+    /////////////////////////////////////////////
+
     Matrix transform(s);
     for(int i=0; i<n; i++){
         for(int j=0; j<n; j++){
@@ -202,21 +208,6 @@ hhTridiag Tridiagonalize(const Matrix& s){
     return {tri, transform};
 }
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 EigenSystem eigen(const hhTridiag& tri) {
     const int n = tri.tridiag.cols;
     Matrix vectors = tri.transformation.T();
@@ -230,11 +221,11 @@ EigenSystem eigen(const hhTridiag& tri) {
     }
     e[n-1] = 0.0;
 
+    /////////////////////////////////////////////
+    // algorithm below provided for CS404 class
+
     int m, l, iter, i, k;
     double s, r, p, g, f, dd, c, b;
-
-    // foreign algorithm
-
     for (l=0; l<n; l++) {
         iter=0;
         do {
@@ -283,6 +274,7 @@ EigenSystem eigen(const hhTridiag& tri) {
     }
 
     // end foreign algorithm
+    /////////////////////////////////////////////
 
     double* values = new double[n];
     for(int i=0; i<n; i++) values[i] = d[i];
