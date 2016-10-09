@@ -11,10 +11,25 @@
 using namespace std;
 
 /**
+Mountain car problem model
+Will be used to train a QLearner instance on how to roll a car up a hill
+that requires it to rock back and forth to gain speed before being able to
+make it up.
+https://en.wikipedia.org/wiki/Mountain_Car
+
+the cars state on the track is represented with the two variables x,y
 x coord -> position -> -1.20:0.05:0.80
 y coord -> velocity -> -0.07:0.01:0.07
-**/
 
+QModel is an interface defined in QLearn.hpp;
+
+It provides a descretized set of Positions, a count of valid moves from those
+positions, and a reward value for being in each position.
+
+The QLearner will run simulations by progressivly taking "moves" out of a
+given start position and learning which (position,move) combinations result in
+the highest reward value being found.
+**/
 class MCar : public QModel {
 public:
     std::default_random_engine gen;
@@ -69,49 +84,15 @@ public:
     }
 };
 
-class Cliff : public QModel {
-//....
-//....
-//....
-//S__E
-public:
-    class State : public QModel::PosData {
-    public:
-        const int x;
-        const int y;
-        State(int x, int y): PosData(x*4 + y), x(x), y(y) {}
-        std::string toString(){
-            std::stringstream ss;
-            ss << "(" << x << "," << y << ")";
-            return ss.str();
-        }
-    };
-    Cliff(): QModel(4,16) {}
-    Pos startValue(){
-        //return Pos(0,3);
-        return Pos(new State(0,3));
-    }
-    Pos move(const Pos& p, int d){
-        State* s = (State*) p.get();
-        const int moveMatr[4][2] = {{0, 1}, {0, -1}, {-1, 0}, {1, 0}};
-                                   //DOWN   UP       LEFT     RIGHT
-        int nx = constrain(0, s->x + moveMatr[d][0], 3);
-        int ny = constrain(0, s->y + moveMatr[d][1], 3);
-        return Pos(new State(nx, ny));
-    }
-    bool terminal(const Pos& p){
-        State* s = (State*) p.get();
-        return (s->x == 3 && s->y == 3);
-    }
-    double reward(const Pos& p){
-        State* s = (State*) p.get();
-        if(s->x == 3 && s->y == 3) return  100;
-        if(s->x >= 1 && s->y == 3) return -100;
-        return -1;
-    }
-};
-
-
+/**
+ * Set up to train a QLearner for 10000 test simulations, then print out
+ * how successful the resulting position->move map the Qlearner came up with
+ * is at getting the car up the hill.
+ *
+ * There is a lot of randomness involved in training the model, so its success
+ * varies from 50% to 99%. Messing with the number of learning iterations
+ * and the learning rate (the 0.4 in m.train below) could affect its accuracy.
+ */
 int main(int argc, char const *argv[]) {
     MCar cl;
     QLearner m(cl, 0.075, 0.9);
@@ -121,43 +102,13 @@ int main(int argc, char const *argv[]) {
         m.train(0.4);
     }
 
-    // Output Q matrix
-    cout.precision(5);
-    //for(int v=0; v<MCar::MOVECNT; v++){
-    for(int v=MCar::MOVECNT-1; v>=0; v--){
-        cout << MCar::VSTATES << " " << MCar::XSTATES << endl;
-        for(int y=0; y<MCar::VSTATES; y++){
-            for(int x=0; x<MCar::XSTATES; x++){
-                double X = ((double)x)*0.05 - 1.20;
-                double Y = ((double)y)*0.01 - 0.07;
-                cout << m.moveValue(Pos(new MCar::State(X,Y)), v) << " ";
-                //cout << ((x==0)? -1 : ( (y==0)? -2 : v)) << " ";
-            }
-            cout << endl;
-        }
-        cout << endl;
-    }
-
-    // Show an action chart
-    for(int x=0; x<MCar::XSTATES; x++){
-        for(int y=0; y<MCar::VSTATES; y++){
-            double X = ((double)x)*0.05 - 1.20;
-            double Y = ((double)y)*0.01 - 0.07;
-            auto P = Pos(new MCar::State(X,Y));
-            auto a = m.bestMove(P);
-            cout << ((a == 0)? 'R' : ((a == 2)? 'F' : '.')) << " ";
-        }
-        cout << endl;
-    }
-
-
     // Run a trial simulation with greedy evaluation
     int pass = 0;
     int fall = 0;
     const int Trials = 10000;
     for(int j=0; j<Trials; j++){
         Pos s = cl.startValue();
-        for(int i=0; i<180; i++){
+        for(int i=0; i<360; i++){
             if(cl.terminal(s)) {
                 if(cl.reward(s) > 0) pass++;
                 else fall++;
@@ -171,16 +122,6 @@ int main(int argc, char const *argv[]) {
          << " Fell: "  << fall
          << " Time: "  << Trials-pass-fall << endl;
 
-/*    Pos s = cl.startValue();
-    for(int i=0; i<180; i++){
-        if(cl.terminal(s)) {
-            pass++;
-            break;
-        }
-        s = std::move(m.getNext(s));
-        cerr << s->toString() << endl;
-    }
-*/
     return 0;
 }
 
